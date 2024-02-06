@@ -1,4 +1,31 @@
+/*
+ 
+CS370 Lab 3
+February 5, 2024
+Yosif Yosif
 
+Description:
+In this lab, we modify this file in the following ways:
+
+- indent and comment the code
+- remove all instances of "label"
+- change the symbol variable to be a pointer instead of an array
+- move the function prototypes to the symbtab.h file
+- modify the functions so that they don't take user inputs and
+  the user input gets taken in the main function only.
+- remove "Modify()" function
+
+In this code, we use a "Linked List" data structure to represent the symbol table.
+This linked list is called SymbTab and it contains a value, and address, and pointer
+to the next structure (just like in a linked list). The address is the address where
+the value is stored.
+
+We are using malloc in this code. Malloc is a dynamic memory method that allows us
+to give variables a dynamic size. We need malloc in this case as we don't know how
+big the structure SymbTab could be. This is due to one of its components, symbol, which
+is a pointer to an array that could take up to 10 characters.
+
+*/
 
 
 
@@ -14,9 +41,9 @@
 int size = 0;
 struct SymbTab *first, *last;
 
-// PRE CONDITION:
-// POST CONDITION:
-// Assumptions: 
+// PRE CONDITION: No precondition
+// POST CONDITION: prompts the user for input and gives corresponding output
+// Assumptions: assumes user input is valid
 void main()
 {
     int op, addr;
@@ -62,9 +89,9 @@ void main()
 
 } /* and of main */
 
-// PRE CONDITION:
-// POST CONDITION:
-// Assumptions: 
+// PRE CONDITION: PTR to character string
+// POST CONDITION: PTR to structure new symbol
+// Assumptions: assumes that the pointer points to a character array
 struct SymbTab *Insert(char *sym, int address)
 {
     struct SymbTab *n = Search(sym);
@@ -97,9 +124,9 @@ struct SymbTab *Insert(char *sym, int address)
     }
 }
 
-// PRE CONDITION:
-// POST CONDITION:
-// Assumptions: 
+// PRE CONDITION: no precondition 
+// POST CONDITION: displays all symbols within the symbol table
+// Assumptions: No assumptions are made
 void Display()
 {
     int i;
@@ -113,9 +140,9 @@ void Display()
     }
 }
 
-// PRE CONDITION:
-// POST CONDITION:
-// Assumptions: 
+// PRE CONDITION: PTR to character string
+// POST CONDITION: PTR to matching structure or NULL
+// Assumptions: assumes that the pointer points to a character array
 struct SymbTab *Search(char *sym)
 {
     int i, flag = 0;
@@ -132,9 +159,9 @@ struct SymbTab *Search(char *sym)
     return NULL;
 }
 
-// PRE CONDITION:
-// POST CONDITION:
-// Assumptions: 
+// PRE CONDITION: PTR to character string
+// POST CONDITION: no post condition, either deletes the symbol or not
+// Assumptions: assumes that the pointer points to a character array
 void Delete(char *sym)
 {
     struct SymbTab *a;

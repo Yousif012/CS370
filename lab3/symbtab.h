@@ -1,10 +1,11 @@
 /*
  
 CS370 Lab 3
-February 3, 2024
+February 5, 2024
 Yosif Yosif
 
 Description:
+In this file, we define the prototypes for functions and structures used in the main file.
 
 */
 
