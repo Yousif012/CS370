@@ -48,7 +48,7 @@ void main()
 {
     int op, addr;
     struct SymbTab * y;
-    char sym[10];
+    char sym[100];
     do
     {
         printf("\n\tSYMBOL TABLE IMPLEMENTATION\n");
@@ -95,6 +95,9 @@ void main()
 struct SymbTab *Insert(char *sym, int address)
 {
     struct SymbTab *n = Search(sym);
+
+    // if symbol already in symbol table, error out
+    // else, add symbol
     if (n != NULL)
     {
         printf("\n\tThe symbol exists already in the symbol table\n\tDuplicate can.t be inserted");
@@ -157,6 +160,7 @@ struct SymbTab *Search(char *sym)
     // go through the linked list and check and match contents with the given symbol
     for (i = 0; i < size; i++)
     {
+        // check if symbol matches
         if (strcmp(p->symbol, sym) == 0){
             flag = 1;
             return p;
@@ -176,12 +180,17 @@ void Delete(char *sym)
     p = first;
 
     a = Search(sym);
+    // if symbol not in symbol table, no need to delete
+    // else, find and delete symbol
     if (a == NULL)
         printf("\n\tSymbol not found\n");
 
     // change pointers in the linked list when a node is removed
     else
     {
+        // check if symbol is first in the list
+        // if not, check if it is last
+        // else, go over the list and check every item
         if (strcmp(first->symbol, sym) == 0)
             first = first->next;
         else if (strcmp(last->symbol, sym) == 0)
@@ -198,6 +207,8 @@ void Delete(char *sym)
         else
         {
                 q = p->next;
+                // slow and fast pointers to the list, so when we find the right node
+                // we can easily remove the node and change pointers
                 while (strcmp(q->symbol, sym) != 0){
                     p=p->next;
                     q = q->next;
