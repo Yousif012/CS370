@@ -102,12 +102,16 @@ struct SymbTab *Insert(char *sym, int address)
     }
     else
     {
+        // copy the given symbol and address into a SymbTab structure
         struct SymbTab *p;
         p = malloc(sizeof(struct SymbTab));
         p->symbol = strdup(sym);
         strcpy(p->symbol, sym);
         p->addr = address;
         p->next = NULL;
+
+        // handle if the symbol was the first to be inserted
+        // otherwise, just attach to the end of the linked list
         if (size == 0)
         {
             first = p;
@@ -133,6 +137,7 @@ void Display()
     struct SymbTab *p;
     p = first;
     printf("\n\tSYMBOL\t\tADDRESS\n");
+    // go through the linked list and print its contents
     for (i = 0; i < size; i++)
     {
         printf("\t%s\t\t%d\n", p->symbol, p->addr);
@@ -148,6 +153,8 @@ struct SymbTab *Search(char *sym)
     int i, flag = 0;
     struct SymbTab *p;
     p = first;
+
+    // go through the linked list and check and match contents with the given symbol
     for (i = 0; i < size; i++)
     {
         if (strcmp(p->symbol, sym) == 0){
@@ -171,6 +178,8 @@ void Delete(char *sym)
     a = Search(sym);
     if (a == NULL)
         printf("\n\tSymbol not found\n");
+
+    // change pointers in the linked list when a node is removed
     else
     {
         if (strcmp(first->symbol, sym) == 0)
