@@ -1,12 +1,11 @@
 /*
  
-CS370 Lab 3
-February 5, 2024
+CS370 Lab 4
+February 16, 2024
 Yosif Yosif
 
 Description:
-In this file, we define the prototypes for functions and structures used in the main file.
-
+We modify this file by adding a new prototype for function FetchAddress that takes a symbol string and returns an address
 */
 
 

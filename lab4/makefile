@@ -1,7 +1,7 @@
-# CS370 Lab 2.2
-# January 26, 2024
+# CS370 Lab 4
+# February 16, 2024
 # Yosif Yosif
-# makefile for Lab 2.2. We have two files, "lab22.l" and "lab22.y", that is needed in our makefile
+# makefile for Lab 4. We have 4 files, "symbtab.h", "symtable.c", "lab4.l" and "lab4.y", that is needed in our makefile
 
 all:    lab4
 

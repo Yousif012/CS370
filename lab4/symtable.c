@@ -1,29 +1,18 @@
 /*
  
-CS370 Lab 3
+CS370 Lab 4
 February 5, 2024
 Yosif Yosif
 
 Description:
-In this lab, we modify this file in the following ways:
+In this lab, we modify this file by adding a new function
 
-- indent and comment the code
-- remove all instances of "label"
-- change the symbol variable to be a pointer instead of an array
-- move the function prototypes to the symbtab.h file
-- modify the functions so that they don't take user inputs and
-  the user input gets taken in the main function only.
-- remove "Modify()" function
+This new function is called FetchAddress. It takes a string that resembles a symbol
+and then returns the address of this symbol if found in the symbol table. If not found,
+the program will exit.
 
-In this code, we use a "Linked List" data structure to represent the symbol table.
-This linked list is called SymbTab and it contains a value, and address, and pointer
-to the next structure (just like in a linked list). The address is the address where
-the value is stored.
-
-We are using malloc in this code. Malloc is a dynamic memory method that allows us
-to give variables a dynamic size. We need malloc in this case as we don't know how
-big the structure SymbTab could be. This is due to one of its components, symbol, which
-is a pointer to an array that could take up to 10 characters.
+We find the symbol and return its address by iterating over the linked list and comparing
+the value of each node with the wanted value. if found, we return the address.
 
 */
 
@@ -224,15 +213,18 @@ void Delete(char *sym)
 }
 
 
-// PRE
-// POST
+// PRE CONDITION: PTR to character string
+// POST CONDITION: address of symbol if found, otherwise BARF
+// Assumptions: no assumptions
 int FetchAddress(char *s){
-    struct SymbTab *sym = Search(s);
+    struct SymbTab *p;
+    p = first;
 
-    if (sym == NULL){
-        return -1;
+    while (p != NULL){
+        if(strcmp(p->symbol, s) == 0) return p->addr;
+        p = p->next;
     }
-
-    return sym->addr;
-
+    printf("variable doesn't exist");
+    exit(1);
+    return -1;
 }

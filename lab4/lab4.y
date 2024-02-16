@@ -47,6 +47,19 @@
 		then we multiply the expressions together.
 */
 
+/*
+	Yosif Yosif
+    Lab 4
+    February 16, 2024
+    Description:
+		In this lab, we will be doing four things:  
+			- define new rules to extend the syntax of the program
+			- create a new type so we can return either char * or integer and assign them names
+			- define tokens and assign them a type
+			- add FetchAddress function where needed
+*/
+
+
 
 	/* begin specs */
 #include <stdio.h>
@@ -126,9 +139,11 @@ stat	:	expr
 			{ fprintf(stderr,"the answer is %d\n", $1); }
 	|	VARIABLE '=' expr
 			{ // if $1 is not in symtable then BARF
-			  // else
-			  if (Search($1) == NULL)
+			  // else change its value in the register
+			  if (Search($1) == NULL){
 				printf("variable not found\n");
+				exit(1);
+			}
 			  else
 				regs[FetchAddress($1)] = $3; }
 	;
@@ -155,6 +170,7 @@ expr	:	'(' expr ')'
 			{ $$ = -$2; }
 	|	VARIABLE
 			{ 	
+				// if variable not found BARF, else fetch address and change its value in the register
 				if (Search($1) == NULL){
 					printf("variable not found\n");
 					exit(1);

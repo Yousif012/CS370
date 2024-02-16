@@ -10,10 +10,18 @@
 
 /*
 	Yosif Yosif
-    Lab 2.2
-    January 26, 2024
+    Lab 4
+    February 16, 2024
     Description:
-		In this file, we add the "()" to the operator list on line 34.
+      In this file, we modify the lab 2.2 to do the following:
+        - modify the program to match variable names instead of just single lower case characters
+          - we do that by modifying the regular expression
+        - add a new rule for INTEGER where we assign yylval.value to the answer.
+          - this relates to the UNION type we created in the YACC file
+        - add a new rule for VARIABLE where we copy the variable name string using strdup
+          - this relates to the UNION type we created in the YACC file
+        
+
 */
 
 
