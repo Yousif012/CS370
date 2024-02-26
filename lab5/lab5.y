@@ -41,6 +41,12 @@ void yyerror (s)  /* Called by yyparse on error */
 %token T_RETURN
 %token T_WRITE
 %token T_READ
+%token T_ADD
+%token T_SUB
+%token T_STRING
+%token T_STAR
+%token T_SLASH
+
 
 
 %%	/* end specs, begin rules */
@@ -85,11 +91,11 @@ Compound_Stmt : '{' Local_Declarations Statement_List '}'
 			  ;
 
 Local_Declarations : /* Empty */
-				   | Var_Declaration
+				   | Var_Declaration Local_Declarations
 				   ;
 
 Statement_List : /* Empty */
-			   | Statement
+			   | Statement Statement_List
 			   ;
 
 Statement : Expression_Stmt
@@ -110,18 +116,19 @@ Selection_Stmt : T_IF '(' Expression ')' Statement
 			   | T_IF '(' Expression ')' Statement T_ELSE Statement
 			   ;
 
-Iteration_Stmt : "while" '(' Expression ')' Statement
+Iteration_Stmt : T_WHILE '(' Expression ')' Statement
 			   ;
 
 Return_Stmt : T_RETURN ';'
 			| T_RETURN Expression ';'
 			;
 
-Read_Stmt : "read" Var ';'
+Read_Stmt : T_READ Var ';'
 		  ;
 
 /* need to do write string */
-Write_Stmt : "write" Expression ';'
+Write_Stmt : T_WRITE Expression ';'
+		   | T_WRITE T_STRING ';'
 		   ;
 
 Assignment_Stmt : Var '=' Simple_Expression ';'
@@ -140,7 +147,26 @@ Simple_Expression : Additive_Expression
 relop : T_LET | T_LT | T_BT | T_BET | T_EE | T_NE ;
 	
 
-Additive_Expression : ;
+Additive_Expression : Term | Term Addop Additive_Expression ; 
+
+Addop : T_ADD | T_SUB ;
+
+Term : Factor | Factor Multop Term ;
+
+Multop : T_STAR | T_SLASH ;
+
+Factor : '(' Expression ')'
+	   | T_NUM
+	   | Var
+	   | Call
+	   | '-' Factor
+	   ;
+
+Call : T_ID '(' Args ')' ;
+
+Args : Args_List | ;
+
+Args_List : Expression | Expression ',' Args_List
 
 
 %%	/* end of rules, start of program */

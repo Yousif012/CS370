@@ -1,7 +1,7 @@
 
 %{
 
-int mydebug=1;
+int mydebug=0;
 #include "y.tab.h"
 %}
 
@@ -11,26 +11,46 @@ int mydebug=1;
 int   {return (T_INT);}
 void {return (T_VOID);}
 
-if {if (mydebug) fprintf(stderr,"if found\n");
+"if" {if (mydebug) fprintf(stderr,"if found\n");
     return (T_IF);}
 
-else {if (mydebug) fprintf(stderr,"else found\n");
+"else" {if (mydebug) fprintf(stderr,"else found\n");
       return (T_ELSE);}
-return {return (T_RETURN);}
-while {return (T_WHILE);}
-read {return (T_READ);}
-write {return (T_WRITE);} 
+"return" {if (mydebug) fprintf(stderr,"return found\n");
+      return (T_RETURN);}
+"while" {if (mydebug) fprintf(stderr,"while found\n");
+      return (T_WHILE);}
+"read" {if (mydebug) fprintf(stderr,"read found\n");
+            return (T_READ);}
+"write" {if (mydebug) fprintf(stderr,"write found\n");
+      return (T_WRITE);} 
 
 "<=" {if (mydebug) fprintf(stderr,"less than or equal found\n");
       return (T_LET);}
-"<" {return (T_LT);}
-">" {return (T_BT);}
-">=" {return (T_BET);}
-"==" {return (T_EE);}
-"!=" {return (T_NE);}
+"<" {if (mydebug) fprintf(stderr,"less than found\n");
+      return (T_LT);}
+">" {if (mydebug) fprintf(stderr,"bigger than found\n");
+      return (T_BT);}
+">=" {if (mydebug) fprintf(stderr,"bigger than or equal found\n");
+      return (T_BET);}
+"==" {if (mydebug) fprintf(stderr,"equal equal found\n");
+      return (T_EE);}
+"!=" {if (mydebug) fprintf(stderr,"not equal found\n");
+      return (T_NE);}
+"+" {if (mydebug) fprintf(stderr,"add found\n");
+      return (T_ADD);}
+"-" {if (mydebug) fprintf(stderr,"subtract found\n");
+      return (T_SUB);}
+"*" {if (mydebug) fprintf(stderr,"star found\n");
+      return (T_STAR);}
+"/" {if (mydebug) fprintf(stderr,"forward slash found\n");
+      return (T_SLASH);}
 
 
-[a-zA-Z][a-zA-Z0-9_]*		{if (mydebug) fprintf(stderr,"ID found\n"); 
+
+\".*\"            {if (mydebug) fprintf(stderr,"string found\n");
+                  return (T_STRING);}
+[a-zA-Z][a-zA-Z_]*		{if (mydebug) fprintf(stderr,"ID found\n"); 
                         
                         yylval.string=strdup(yytext); 
                         return(T_ID);}

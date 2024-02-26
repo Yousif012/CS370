@@ -60,7 +60,12 @@ extern int yydebug;
     T_WHILE = 270,
     T_RETURN = 271,
     T_WRITE = 272,
-    T_READ = 273
+    T_READ = 273,
+    T_ADD = 274,
+    T_SUB = 275,
+    T_STRING = 276,
+    T_STAR = 277,
+    T_SLASH = 278
   };
 #endif
 /* Tokens.  */
@@ -80,6 +85,11 @@ extern int yydebug;
 #define T_RETURN 271
 #define T_WRITE 272
 #define T_READ 273
+#define T_ADD 274
+#define T_SUB 275
+#define T_STRING 276
+#define T_STAR 277
+#define T_SLASH 278
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -91,7 +101,7 @@ union YYSTYPE
       int value;
       char * string;
 
-#line 95 "y.tab.h" /* yacc.c:1909  */
+#line 105 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
