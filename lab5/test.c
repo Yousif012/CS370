@@ -1,17 +1,5 @@
-int x;
-int x, x;
-
-int x, A[30];
-
-
-void A[500];
-
-int fun(int a, int b[]){
-
-if ( x <= 300 ) return ;
-
-}
-
+// Shaun Cooper
+// Test one
 
 int x;
 int x,x;
@@ -34,7 +22,7 @@ int main(int a, void b, int a[]) {
      if ( x ) write 5 ;
      if( x < 3) return 5; else write "great";
 
-}
+} // of main
 
 void f(void) {}
 

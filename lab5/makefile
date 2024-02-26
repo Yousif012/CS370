@@ -1,7 +1,7 @@
 # CS370 Lab 5
-# February 16, 2024
+# February 26, 2024
 # Yosif Yosif
-# makefile for Lab 4. We have 4 files, "symbtab.h", "symtable.c", "lab5.l" and "lab5.y", that is needed in our makefile
+# makefile for Lab 5. We have 4 files, "lex.yy.c", "y.tab.c", "lab5.l" and "lab5.y", that is needed in our makefile
 
 all:    lab5
 
