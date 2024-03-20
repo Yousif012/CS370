@@ -114,6 +114,7 @@ void ASTprint(int level, ASTnode *p)
     printf("NUMBER value %d", p->value);
     printf("\n");
     break;
+
   case A_EXPR:
     PT(level);
     printf("EXPRESSION Operator ");
@@ -121,16 +122,87 @@ void ASTprint(int level, ASTnode *p)
       case A_PLUS:
         printf("PLUS"); break;
       case A_MINUS:
-        printf("MINUS");
+        printf("MINUS"); break;
+      case A_LET:
+        printf("<="); break;
+      case A_LT:
+        printf("<"); break;
+      case A_BET:
+        printf(">="); break;
+      case A_BT:
+        printf(">"); break;
+      case A_EE:
+        printf("=="); break;
+      case A_NE:
+        printf("!="); break;
       default:
         printf("unknown operator in A_EXPR in ASTprint");
-
     }
     printf("\n");
     ASTprint(level+1, p->s1);
     ASTprint(level+1, p->s2);
-  
+    break;
+
+  case A_PARAM:
+    PT(level);
+    printf("Parameter %s %s ", ASTtypeToString(p->my_data_type), p->name);
+    printf("\n");
+    ASTprint(level, p->next);
     break; 
+
+  case A_IF:
+    PT(level);
+    printf("IF STATEMENT\n");
+    PT(level+1);
+    printf("IF expression\n");
+    ASTprint(level+2, p->s1);
+    PT(level+1);
+    printf("IF body\n");
+    ASTprint(level+2, p->s2->s1);
+    if(p->s2->s2 != NULL){
+      PT(level+1);
+      printf("ELSE body\n");
+      ASTprint(level+2, p->s2->s2);
+    }
+    ASTprint(level, p->next);
+    break;
+  
+  case A_VAR:
+    PT(level);
+    printf("VARIABLE %s ", p->name);
+    printf("\n");
+
+    if(p->s1 != NULL){
+      PT(level);
+      printf("[\n");
+      ASTprint(level+1, p->s1);
+      PT(level);
+      printf("]\n");
+    }
+    break;
+  case A_WHILE:
+    PT(level);
+    printf("WHILE expression\n");
+    ASTprint(level+1, p->s1);
+    PT(level);
+    printf("WHILE body\n");
+    ASTprint(level+1, p->s2);
+
+    ASTprint(level, p->next);
+    break;
+
+  case A_ASSIGN:
+    PT(level);
+    printf("ASSIGMENT STATEMENT\n");
+    ASTprint(level+1, p->s1);
+    PT(level);
+    printf("is assigned\n");
+    ASTprint(level+1, p->s2);
+
+    ASTprint(level, p->next);
+
+    break;
+
   default:
     printf("unknown AST Node type %d in ASTprint\n", p->type);
   }

@@ -25,7 +25,13 @@ enum ASTtype {
    A_COMPOUND,
    A_WRITE,
    A_NUM,
-   A_EXPR
+   A_EXPR,
+   A_PARAM,
+   A_IF,
+   A_IFBODY,
+   A_VAR,
+   A_WHILE,
+   A_ASSIGN
 	   //missing
 };
 
@@ -34,7 +40,13 @@ enum ASTtype {
 enum AST_OPERATORS {
    A_PLUS,
    A_MINUS,
-   A_TIMES
+   A_TIMES,
+   A_LET,
+   A_LT,
+   A_BT,
+   A_BET,
+   A_EE,
+   A_NE
 	   //missing
 };
 

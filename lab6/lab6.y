@@ -57,8 +57,8 @@ void yyerror (s)  /* Called by yyparse on error */
 %type <node> Declaration_List Declaration Var_Declaration Var_List
 %type <node> Fun_Declaration Params Compound_Stmt Local_Declarations Statement_List Statement
 %type <node> Write_Stmt Expression Simple_Expression Additive_Expression Term
-%type <node> Factor Var Call
-%type <operator> Addop
+%type <node> Factor Var Call Param Params_List Selection_Stmt Expression_Stmt Iteration_Stmt Assignment_Stmt
+%type <operator> Addop relop 
 
 %type <d_type> Type_Specifier
 
@@ -128,14 +128,26 @@ Fun_Declaration : Type_Specifier T_ID '(' Params ')' Compound_Stmt
 				;
 
 Params : T_VOID { $$ = NULL; }
-	   | Params_List { $$ = NULL; }
+	   | Params_List { $$ = $1; }
 	   ;
 
-Params_List : Param
+Params_List : Param { $$ = $1; }
 			| Param ',' Params_List
+			{ $$ = $1; 
+			  $$->next = $3; }
 			;
 Param : Type_Specifier T_ID
+		{ 
+		  $$ = ASTCreateNode(A_PARAM);
+		  $$->name = $2;
+		  $$->my_data_type = $1;
+		}
 	  | Type_Specifier T_ID '[' ']'
+	  	{ 
+		  $$ = ASTCreateNode(A_PARAM);
+		  $$->name = $2;
+		  $$->my_data_type = $1;
+		}
 	  ;
 
 Compound_Stmt : '{' Local_Declarations Statement_List '}'
@@ -162,25 +174,43 @@ Statement_List : /* Empty */ { $$ = NULL; }
 			   }
 			   ;
 
-Statement : Expression_Stmt { $$ = NULL; }
+Statement : Expression_Stmt { $$ = $1; }
 		  | Compound_Stmt { $$ = $1; }
-		  | Selection_Stmt { $$ = NULL; }
-		  | Iteration_Stmt { $$ = NULL; }
-		  | Assignment_Stmt { $$ = NULL; }
+		  | Selection_Stmt { $$ = $1; }
+		  | Iteration_Stmt { $$ = $1; }
+		  | Assignment_Stmt { $$ = $1; }
 		  | Return_Stmt { $$ = NULL; }
 		  | Read_Stmt { $$ = NULL; }
 		  | Write_Stmt { $$ = $1; }
 		  ;
 
-Expression_Stmt : Expression ';'
-				| ';'
+Expression_Stmt : Expression ';' { $$ = $1; }
+				| ';' { $$ = NULL; }
 				;
 
 Selection_Stmt : T_IF '(' Expression ')' Statement
+				{
+				 $$ = ASTCreateNode(A_IF);
+				 $$->s1 = $3;
+				 $$->s2 = ASTCreateNode(A_IFBODY);
+				 $$->s2->s1 = $5;
+				}
 			   | T_IF '(' Expression ')' Statement T_ELSE Statement
+				{
+				 $$ = ASTCreateNode(A_IF);
+				 $$->s1 = $3;
+				 $$->s2 = ASTCreateNode(A_IFBODY);
+				 $$->s2->s1 = $5;
+				 $$->s2->s2 = $7;
+				}
 			   ;
 
 Iteration_Stmt : T_WHILE '(' Expression ')' Statement
+			   {
+				$$ = ASTCreateNode(A_WHILE);
+				$$->s1 = $3;
+				$$->s2 = $5;
+			   }
 			   ;
 
 Return_Stmt : T_RETURN ';'
@@ -205,10 +235,24 @@ Write_Stmt : T_WRITE T_STRING ';'
 		   ;
 
 Assignment_Stmt : Var '=' Simple_Expression ';'
+				{
+					$$ = ASTCreateNode(A_ASSIGN);
+					$$->s1 = $1;
+					$$->s2 = $3;
+				}
 				;
 
-Var : T_ID { $$ = NULL; }
-	| T_ID '[' Expression ']' { $$ = NULL; }
+Var : T_ID 
+	{ 
+		$$ = ASTCreateNode(A_VAR);
+	   	$$->name = $1;
+	}
+	| T_ID '[' Expression ']'
+	{ 
+		$$ = ASTCreateNode(A_VAR);
+	   	$$->name = $1;
+		$$->s1 = $3;
+	}
 	;
 
 Expression : Simple_Expression { $$ = $1; }
@@ -216,11 +260,20 @@ Expression : Simple_Expression { $$ = $1; }
 
 Simple_Expression : Additive_Expression { $$ = $1; }
 				  | Additive_Expression relop Additive_Expression 
-				  { 
-					$$ = NULL;
-				  }
+					{
+					 $$ = ASTCreateNode(A_EXPR); 
+					 $$->s1 = $1;
+					 $$->s2 = $3;
+					 $$->operator = $2;
+					}
 
-relop : T_LET | T_LT | T_BT | T_BET | T_EE | T_NE ;
+relop : T_LET { $$ = A_LET; } 
+      | T_LT  { $$ = A_LT; }
+	  | T_BT  { $$ = A_BT; }
+	  | T_BET { $$ = A_BET; }
+	  | T_EE  { $$ = A_EE; }
+	  | T_NE  { $$ = A_NE; }
+	  ;
 	
 
 Additive_Expression : Term { $$ = $1; }
@@ -247,7 +300,7 @@ Factor : '(' Expression ')' { $$ = $2; }
 		 $$ = ASTCreateNode(A_NUM);
 	   	 $$->value = $1; 
 	   }
-	   | Var { $$ = NULL; }
+	   | Var { $$ = $1; }
 	   | Call { $$ = NULL; }
 	   | '-' Factor { $$ = NULL; }
 	   ;
