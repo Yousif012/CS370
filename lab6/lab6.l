@@ -51,6 +51,7 @@ void {return (T_VOID);}
 
 
 
+
 \".*\"            { yylval.string = strdup(yytext);
                     return (T_STRING);}
 [a-zA-Z][a-zA-Z0-9_]*	{

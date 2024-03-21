@@ -31,7 +31,10 @@ enum ASTtype {
    A_IFBODY,
    A_VAR,
    A_WHILE,
-   A_ASSIGN
+   A_ASSIGN,
+   A_RETURN,
+   A_READ,
+   A_CALL
 	   //missing
 };
 
@@ -46,7 +49,9 @@ enum AST_OPERATORS {
    A_BT,
    A_BET,
    A_EE,
-   A_NE
+   A_NE,
+   A_MULT,
+   A_DIV
 	   //missing
 };
 

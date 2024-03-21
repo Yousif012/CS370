@@ -499,10 +499,10 @@ static const yytype_uint16 yyrline[] =
      100,   104,   108,   113,   120,   130,   131,   134,   135,   139,
      145,   153,   161,   162,   169,   170,   177,   178,   179,   180,
      181,   182,   183,   184,   187,   188,   191,   198,   208,   216,
-     217,   220,   224,   229,   237,   245,   250,   258,   261,   262,
-     270,   271,   272,   273,   274,   275,   279,   280,   289,   290,
-     292,   293,   295,   295,   297,   298,   303,   304,   305,   308,
-     311,   311,   313,   313
+     218,   226,   234,   239,   247,   255,   260,   268,   271,   272,
+     280,   281,   282,   283,   284,   285,   289,   290,   299,   300,
+     302,   303,   312,   312,   314,   315,   320,   321,   322,   325,
+     333,   333,   335,   339
 };
 #endif
 
@@ -1685,12 +1685,12 @@ yyreduce:
 
   case 31:
 #line 182 "lab6.y"
-    { (yyval.node) = NULL; }
+    { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 32:
 #line 183 "lab6.y"
-    { (yyval.node) = NULL; }
+    { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 33:
@@ -1738,8 +1738,29 @@ yyreduce:
 			   }
     break;
 
+  case 39:
+#line 217 "lab6.y"
+    { (yyval.node) = ASTCreateNode(A_RETURN); }
+    break;
+
+  case 40:
+#line 219 "lab6.y"
+    { 
+				(yyval.node) = ASTCreateNode(A_RETURN); 
+				(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
+			}
+    break;
+
+  case 41:
+#line 227 "lab6.y"
+    {
+			(yyval.node) = ASTCreateNode(A_READ);
+			(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
+		  }
+    break;
+
   case 42:
-#line 225 "lab6.y"
+#line 235 "lab6.y"
     { 
 			 (yyval.node) = ASTCreateNode(A_WRITE);
 			 (yyval.node)->name = (yyvsp[(2) - (3)].string);
@@ -1747,7 +1768,7 @@ yyreduce:
     break;
 
   case 43:
-#line 230 "lab6.y"
+#line 240 "lab6.y"
     {
 			 (yyval.node) = ASTCreateNode(A_WRITE);
 			 (yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1755,7 +1776,7 @@ yyreduce:
     break;
 
   case 44:
-#line 238 "lab6.y"
+#line 248 "lab6.y"
     {
 					(yyval.node) = ASTCreateNode(A_ASSIGN);
 					(yyval.node)->s1 = (yyvsp[(1) - (4)].node);
@@ -1764,7 +1785,7 @@ yyreduce:
     break;
 
   case 45:
-#line 246 "lab6.y"
+#line 256 "lab6.y"
     { 
 		(yyval.node) = ASTCreateNode(A_VAR);
 	   	(yyval.node)->name = (yyvsp[(1) - (1)].string);
@@ -1772,7 +1793,7 @@ yyreduce:
     break;
 
   case 46:
-#line 251 "lab6.y"
+#line 261 "lab6.y"
     { 
 		(yyval.node) = ASTCreateNode(A_VAR);
 	   	(yyval.node)->name = (yyvsp[(1) - (4)].string);
@@ -1781,17 +1802,17 @@ yyreduce:
     break;
 
   case 47:
-#line 258 "lab6.y"
+#line 268 "lab6.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 48:
-#line 261 "lab6.y"
+#line 271 "lab6.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 49:
-#line 263 "lab6.y"
+#line 273 "lab6.y"
     {
 					 (yyval.node) = ASTCreateNode(A_EXPR); 
 					 (yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -1801,42 +1822,42 @@ yyreduce:
     break;
 
   case 50:
-#line 270 "lab6.y"
+#line 280 "lab6.y"
     { (yyval.operator) = A_LET; }
     break;
 
   case 51:
-#line 271 "lab6.y"
+#line 281 "lab6.y"
     { (yyval.operator) = A_LT; }
     break;
 
   case 52:
-#line 272 "lab6.y"
+#line 282 "lab6.y"
     { (yyval.operator) = A_BT; }
     break;
 
   case 53:
-#line 273 "lab6.y"
+#line 283 "lab6.y"
     { (yyval.operator) = A_BET; }
     break;
 
   case 54:
-#line 274 "lab6.y"
+#line 284 "lab6.y"
     { (yyval.operator) = A_EE; }
     break;
 
   case 55:
-#line 275 "lab6.y"
+#line 285 "lab6.y"
     { (yyval.operator) = A_NE; }
     break;
 
   case 56:
-#line 279 "lab6.y"
+#line 289 "lab6.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 57:
-#line 281 "lab6.y"
+#line 291 "lab6.y"
     {
 					 (yyval.node) = ASTCreateNode(A_EXPR); 
 					 (yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -1846,32 +1867,47 @@ yyreduce:
     break;
 
   case 58:
-#line 289 "lab6.y"
+#line 299 "lab6.y"
     { (yyval.operator) = A_PLUS; }
     break;
 
   case 59:
-#line 290 "lab6.y"
+#line 300 "lab6.y"
     { (yyval.operator) = A_MINUS; }
     break;
 
   case 60:
-#line 292 "lab6.y"
+#line 302 "lab6.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 61:
-#line 293 "lab6.y"
-    { (yyval.node) = NULL; }
+#line 304 "lab6.y"
+    { 
+		(yyval.node) = ASTCreateNode(A_EXPR); 
+		(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
+		(yyval.node)->s2 = (yyvsp[(3) - (3)].node);
+		(yyval.node)->operator = (yyvsp[(2) - (3)].operator);
+	 }
+    break;
+
+  case 62:
+#line 312 "lab6.y"
+    { (yyval.operator) = A_MULT; }
+    break;
+
+  case 63:
+#line 312 "lab6.y"
+    { (yyval.operator) = A_DIV; }
     break;
 
   case 64:
-#line 297 "lab6.y"
+#line 314 "lab6.y"
     { (yyval.node) = (yyvsp[(2) - (3)].node); }
     break;
 
   case 65:
-#line 299 "lab6.y"
+#line 316 "lab6.y"
     { 
 		 (yyval.node) = ASTCreateNode(A_NUM);
 	   	 (yyval.node)->value = (yyvsp[(1) - (1)].value); 
@@ -1879,28 +1915,57 @@ yyreduce:
     break;
 
   case 66:
-#line 303 "lab6.y"
+#line 320 "lab6.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 67:
-#line 304 "lab6.y"
-    { (yyval.node) = NULL; }
+#line 321 "lab6.y"
+    { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 68:
-#line 305 "lab6.y"
+#line 322 "lab6.y"
     { (yyval.node) = NULL; }
     break;
 
   case 69:
-#line 308 "lab6.y"
+#line 326 "lab6.y"
+    { 
+		(yyval.node) = ASTCreateNode(A_CALL); 
+		(yyval.node)->name = (yyvsp[(1) - (4)].string);
+		(yyval.node)->s1 = (yyvsp[(3) - (4)].node);
+	}
+    break;
+
+  case 70:
+#line 333 "lab6.y"
+    { (yyval.node) = (yyvsp[(1) - (1)].node); }
+    break;
+
+  case 71:
+#line 333 "lab6.y"
     { (yyval.node) = NULL; }
+    break;
+
+  case 72:
+#line 336 "lab6.y"
+    { 
+			(yyval.node) = (yyvsp[(1) - (1)].node); 
+		  }
+    break;
+
+  case 73:
+#line 340 "lab6.y"
+    { 
+			(yyval.node) = (yyvsp[(1) - (3)].node);
+			(yyval.node)->next = (yyvsp[(3) - (3)].node); 
+		  }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1904 "y.tab.c"
+#line 1969 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2114,7 +2179,7 @@ yyreturn:
 }
 
 
-#line 316 "lab6.y"
+#line 347 "lab6.y"
 	/* end of rules, start of program */
 
 int main()

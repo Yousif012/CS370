@@ -15,5 +15,11 @@ int main(int x, int y, void z[])
   write 12;
   write 6+9;
 
-  w[1] = 5;
+  w[1] = (5 * 30 + (x / y));
+
+  read x;
+
+  a(a,b[3], f(x));
+
+  return 5;
 }

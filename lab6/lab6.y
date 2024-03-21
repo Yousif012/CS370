@@ -56,9 +56,9 @@ void yyerror (s)  /* Called by yyparse on error */
 
 %type <node> Declaration_List Declaration Var_Declaration Var_List
 %type <node> Fun_Declaration Params Compound_Stmt Local_Declarations Statement_List Statement
-%type <node> Write_Stmt Expression Simple_Expression Additive_Expression Term
-%type <node> Factor Var Call Param Params_List Selection_Stmt Expression_Stmt Iteration_Stmt Assignment_Stmt
-%type <operator> Addop relop 
+%type <node> Write_Stmt Expression Simple_Expression Additive_Expression Term Args_List Args
+%type <node> Factor Var Call Param Params_List Selection_Stmt Expression_Stmt Iteration_Stmt Assignment_Stmt Return_Stmt Read_Stmt
+%type <operator> Addop relop Multop
 
 %type <d_type> Type_Specifier
 
@@ -179,8 +179,8 @@ Statement : Expression_Stmt { $$ = $1; }
 		  | Selection_Stmt { $$ = $1; }
 		  | Iteration_Stmt { $$ = $1; }
 		  | Assignment_Stmt { $$ = $1; }
-		  | Return_Stmt { $$ = NULL; }
-		  | Read_Stmt { $$ = NULL; }
+		  | Return_Stmt { $$ = $1; }
+		  | Read_Stmt { $$ = $1; }
 		  | Write_Stmt { $$ = $1; }
 		  ;
 
@@ -214,10 +214,20 @@ Iteration_Stmt : T_WHILE '(' Expression ')' Statement
 			   ;
 
 Return_Stmt : T_RETURN ';'
+			{ $$ = ASTCreateNode(A_RETURN); }
 			| T_RETURN Expression ';'
+			{ 
+				$$ = ASTCreateNode(A_RETURN); 
+				$$->s1 = $2;
+			}
+
 			;
 
 Read_Stmt : T_READ Var ';'
+		  {
+			$$ = ASTCreateNode(A_READ);
+			$$->s1 = $2;
+		  }
 		  ;
 
 /* need to do write string */
@@ -290,9 +300,16 @@ Addop : T_ADD { $$ = A_PLUS; }
 	  | T_SUB { $$ = A_MINUS; };
 
 Term : Factor { $$ = $1; }
-	 | Factor Multop Term { $$ = NULL; } ;
+	 | Factor Multop Term 
+	 { 
+		$$ = ASTCreateNode(A_EXPR); 
+		$$->s1 = $1;
+		$$->s2 = $3;
+		$$->operator = $2;
+	 } 
+	 ;
 
-Multop : T_STAR | T_SLASH ;
+Multop : T_STAR { $$ = A_MULT; } | T_SLASH { $$ = A_DIV; } ;
 
 Factor : '(' Expression ')' { $$ = $2; }
 	   | T_NUM 
@@ -301,16 +318,30 @@ Factor : '(' Expression ')' { $$ = $2; }
 	   	 $$->value = $1; 
 	   }
 	   | Var { $$ = $1; }
-	   | Call { $$ = NULL; }
+	   | Call { $$ = $1; }
 	   | '-' Factor { $$ = NULL; }
 	   ;
 
-Call : T_ID '(' Args ')'  { $$ = NULL; }
+Call : T_ID '(' Args ')'  
+	{ 
+		$$ = ASTCreateNode(A_CALL); 
+		$$->name = $1;
+		$$->s1 = $3;
+	}
 	 ;
 
-Args : Args_List | ;
+Args : Args_List { $$ = $1; }| { $$ = NULL; } ;
 
-Args_List : Expression | Expression ',' Args_List
+Args_List : Expression
+		  { 
+			$$ = $1; 
+		  }
+		  | Expression ',' Args_List
+		  { 
+			$$ = $1;
+			$$->next = $3; 
+		  }
+		  ;
 
 
 %%	/* end of rules, start of program */

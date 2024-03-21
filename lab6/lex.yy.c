@@ -875,13 +875,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 54 "lab6.l"
+#line 55 "lab6.l"
 { yylval.string = strdup(yytext);
                     return (T_STRING);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 56 "lab6.l"
+#line 57 "lab6.l"
 {
                         yylval.string=strdup(yytext); 
                         return(T_ID);
@@ -889,7 +889,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 61 "lab6.l"
+#line 62 "lab6.l"
 {           
                   yylval.value=atoi((const char *)yytext); 
                   return(T_NUM);
@@ -897,23 +897,23 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 66 "lab6.l"
+#line 67 "lab6.l"
 {/* whitespace, do nothing */}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 68 "lab6.l"
+#line 69 "lab6.l"
 { return (*yytext);}
 	YY_BREAK
 case 25:
 /* rule 25 can match eol */
 YY_RULE_SETUP
-#line 70 "lab6.l"
+#line 71 "lab6.l"
 { linecount++; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 72 "lab6.l"
+#line 73 "lab6.l"
 ECHO;
 	YY_BREAK
 #line 919 "lex.yy.c"
@@ -1921,7 +1921,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 72 "lab6.l"
+#line 73 "lab6.l"
 
 
 int yywrap(void)

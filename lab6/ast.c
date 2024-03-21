@@ -135,6 +135,10 @@ void ASTprint(int level, ASTnode *p)
         printf("=="); break;
       case A_NE:
         printf("!="); break;
+      case A_MULT:
+        printf("TIMES"); break;
+      case A_DIV:
+        printf("/"); break;
       default:
         printf("unknown operator in A_EXPR in ASTprint");
     }
@@ -179,6 +183,8 @@ void ASTprint(int level, ASTnode *p)
       PT(level);
       printf("]\n");
     }
+
+    ASTprint(level, p->next);
     break;
   case A_WHILE:
     PT(level);
@@ -203,6 +209,35 @@ void ASTprint(int level, ASTnode *p)
 
     break;
 
+  case A_RETURN:
+    PT(level);
+    printf("RETURN STATEMENT\n");
+    if(p->s1 != NULL){
+      ASTprint(level+1, p->s1);
+    }
+
+    ASTprint(level, p->next);
+
+    break;
+
+  case A_READ:
+    PT(level);
+    printf("READ STATEMENT\n");
+    ASTprint(level+1, p->s1);
+
+    ASTprint(level, p->next);
+
+    break;
+
+  case A_CALL:
+    PT(level);
+    printf("CALL STATEMENT function %s \n", p->name);
+    ASTprint(level+1, p->s1);
+
+
+    ASTprint(level, p->next);
+
+    break;
   default:
     printf("unknown AST Node type %d in ASTprint\n", p->type);
   }
