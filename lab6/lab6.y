@@ -56,9 +56,9 @@ void yyerror (s)  /* Called by yyparse on error */
 
 %type <node> Declaration_List Declaration Var_Declaration Var_List
 %type <node> Fun_Declaration Params Compound_Stmt Local_Declarations Statement_List Statement
-%type <node> Write_Stmt Expression Simple_Expression Additive_Expression Term Args_List Args
+%type <node> Write_Stmt Expression Simple_Expression Additive_Expression Term Args Args_List
 %type <node> Factor Var Call Param Params_List Selection_Stmt Expression_Stmt Iteration_Stmt Assignment_Stmt Return_Stmt Read_Stmt
-%type <operator> Addop relop Multop
+%type <operator> Addop relop Multop 
 
 %type <d_type> Type_Specifier
 
@@ -103,6 +103,7 @@ Var_List : T_ID
 		   }
 		 | T_ID '[' T_NUM ']' 
 		   { $$ = ASTCreateNode(A_VARDEC); 
+		     $$->value = $3;
 		     $$->name = $1; 
 		   }
 		 | T_ID ',' Var_List 
@@ -113,6 +114,7 @@ Var_List : T_ID
 		 | T_ID '[' T_NUM ']' ',' Var_List
 		   { $$ = ASTCreateNode(A_VARDEC); 
 			 $$->name = $1; 
+			 $$->value = $3;
 			 $$->s1 = $6;
 		   }
 		 ;
@@ -289,7 +291,7 @@ relop : T_LET { $$ = A_LET; }
 Additive_Expression : Term { $$ = $1; }
 				    | Term Addop Additive_Expression 
 					{
-					 $$ = ASTCreateNode(A_EXPR); 
+					 $$ = ASTCreateNode(A_EXPR);
 					 $$->s1 = $1;
 					 $$->s2 = $3;
 					 $$->operator = $2;
@@ -302,7 +304,7 @@ Addop : T_ADD { $$ = A_PLUS; }
 Term : Factor { $$ = $1; }
 	 | Factor Multop Term 
 	 { 
-		$$ = ASTCreateNode(A_EXPR); 
+		$$ = ASTCreateNode(A_EXPR);
 		$$->s1 = $1;
 		$$->s2 = $3;
 		$$->operator = $2;
@@ -319,29 +321,34 @@ Factor : '(' Expression ')' { $$ = $2; }
 	   }
 	   | Var { $$ = $1; }
 	   | Call { $$ = $1; }
-	   | '-' Factor { $$ = NULL; }
+	   | T_SUB Factor 
+	   { 
+		$$ = ASTCreateNode(A_EXPR);
+		$$->operator = A_UMINUS;
+		$$->s1 = $2; 
+	   }
 	   ;
 
 Call : T_ID '(' Args ')'  
-	{ 
-		$$ = ASTCreateNode(A_CALL); 
-		$$->name = $1;
-		$$->s1 = $3;
-	}
+	 { $$ = ASTCreateNode(A_CALL);
+	   $$->name = $1;
+	   $$->s1 = $3;
+	 }
 	 ;
 
-Args : Args_List { $$ = $1; }| { $$ = NULL; } ;
+Args : Args_List { $$ = $1; } |  { $$ = NULL; } ;
 
 Args_List : Expression
 		  { 
-			$$ = $1; 
+			$$ = ASTCreateNode(A_ARG);
+			$$->s1 = $1;
 		  }
 		  | Expression ',' Args_List
 		  { 
-			$$ = $1;
-			$$->next = $3; 
+			$$ = ASTCreateNode(A_ARG);
+			$$->s1 = $1;
+			$$->next = $3;
 		  }
-		  ;
 
 
 %%	/* end of rules, start of program */

@@ -34,8 +34,8 @@ enum ASTtype {
    A_ASSIGN,
    A_RETURN,
    A_READ,
-   A_CALL
-	   //missing
+   A_CALL,
+   A_ARG
 };
 
 // Math Operators
@@ -51,7 +51,8 @@ enum AST_OPERATORS {
    A_EE,
    A_NE,
    A_MULT,
-   A_DIV
+   A_DIV,
+   A_UMINUS,
 	   //missing
 };
 

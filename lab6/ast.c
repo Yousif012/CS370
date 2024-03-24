@@ -74,7 +74,8 @@ void ASTprint(int level, ASTnode *p)
   {
   case A_VARDEC:
     PT(level);
-    printf("Variable %s %s ", ASTtypeToString(p->my_data_type), p->name);
+    printf("Variable %s %s", ASTtypeToString(p->my_data_type), p->name);
+    if(p->value != NULL) printf("[%d]", p->value);
     printf("\n");
     ASTprint(level, p->s1);
     ASTprint(level, p->next);
@@ -135,10 +136,12 @@ void ASTprint(int level, ASTnode *p)
         printf("=="); break;
       case A_NE:
         printf("!="); break;
-      case A_MULT:
-        printf("TIMES"); break;
       case A_DIV:
         printf("/"); break;
+      case A_MULT:
+        printf("TIMES"); break;
+      case A_UMINUS:
+        printf("Unary-minus"); break;
       default:
         printf("unknown operator in A_EXPR in ASTprint");
     }
@@ -173,7 +176,7 @@ void ASTprint(int level, ASTnode *p)
   
   case A_VAR:
     PT(level);
-    printf("VARIABLE %s ", p->name);
+    printf("VARIABLE %s", p->name);
     printf("\n");
 
     if(p->s1 != NULL){
@@ -183,8 +186,6 @@ void ASTprint(int level, ASTnode *p)
       PT(level);
       printf("]\n");
     }
-
-    ASTprint(level, p->next);
     break;
   case A_WHILE:
     PT(level);
@@ -222,22 +223,31 @@ void ASTprint(int level, ASTnode *p)
 
   case A_READ:
     PT(level);
-    printf("READ STATEMENT\n");
+    printf("READ Expression\n");
     ASTprint(level+1, p->s1);
 
     ASTprint(level, p->next);
-
     break;
 
   case A_CALL:
     PT(level);
-    printf("CALL STATEMENT function %s \n", p->name);
+    printf("CALL STATEMENT function %s\n", p->name);
+
     ASTprint(level+1, p->s1);
 
+    ASTprint(level, p->next);
+    break;
+  
+  case A_ARG:
+    PT(level);
+    printf("CALL argument\n");
+
+    ASTprint(level+1, p->s1);
 
     ASTprint(level, p->next);
 
     break;
+
   default:
     printf("unknown AST Node type %d in ASTprint\n", p->type);
   }
