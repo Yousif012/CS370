@@ -66,6 +66,7 @@ void {return (T_VOID);}
 
 [ \t]		{/* whitespace, do nothing */}
 
+
 [;=\-+*/%&|()\[\],{}] 	{ return (*yytext);}
                        
 \n 		{ linecount++; }

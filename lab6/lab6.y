@@ -72,7 +72,7 @@ Declaration_List : Declaration { $$ = $1; }
 				 | Declaration Declaration_List
 				 {
 					$$ = $1;
-					$$->next = $2;
+					if($1 != NULL) $$->next = $2;
 				 }
 				 ;
 
@@ -136,7 +136,7 @@ Params : T_VOID { $$ = NULL; }
 Params_List : Param { $$ = $1; }
 			| Param ',' Params_List
 			{ $$ = $1; 
-			  $$->next = $3; }
+			  if($1 != NULL) $$->next = $3; }
 			;
 Param : Type_Specifier T_ID
 		{ 
@@ -164,7 +164,7 @@ Local_Declarations : /* Empty */ { $$ = NULL; }
 				   | Var_Declaration Local_Declarations
 				   { 
 					 $$ = $1;
-				     $$->next = $2;
+				     if($1 != NULL) $$->next = $2;
 				   }
 				   ;
 
@@ -172,7 +172,7 @@ Statement_List : /* Empty */ { $$ = NULL; }
 			   | Statement Statement_List
 			   {
 				$$ = $1;
-				$$->next = $2;
+				if($1 != NULL) $$->next = $2;
 			   }
 			   ;
 
@@ -347,7 +347,7 @@ Args_List : Expression
 		  { 
 			$$ = ASTCreateNode(A_ARG);
 			$$->s1 = $1;
-			$$->next = $3;
+			if($1 != NULL) $$->next = $3;
 		  }
 
 

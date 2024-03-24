@@ -1,4 +1,4 @@
-void x,y,z[200];
+void x,y,z[100];
 int x[100];
 int main(void)
 {
@@ -24,4 +24,5 @@ int main(void)
 
 void f(int x, void y , void z [] )
 {
+;;;;
 }
