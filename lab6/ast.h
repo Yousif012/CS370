@@ -8,6 +8,17 @@
 
 */
 
+/*
+
+    Yosif Yosif
+    Lab 6
+    March 25, 2024
+    Description:
+      In this file, we have added more types to the enum ASTtype and we have also added types
+      to AST_OPERATORS to represent the different operators we use in the program.
+
+*/
+
 #include<stdio.h>
 //#include<malloc.h>
 #include <stdlib.h>
@@ -53,13 +64,11 @@ enum AST_OPERATORS {
    A_MULT,
    A_DIV,
    A_UMINUS,
-	   //missing
 };
 
 enum AST_MY_DATA_TYPE {
    A_INTTYPE,
    A_VOIDTYPE
-
 };
 
 /* define a type AST node which will hold pointers to AST structs that will

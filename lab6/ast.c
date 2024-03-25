@@ -10,13 +10,24 @@
 
 */
 
+/*
+
+    Yosif Yosif
+    Lab 6
+    March 25, 2024
+    Description:
+      In this file, we define the functions responsible for the Abstract Syntax Tree. We create functions for
+      creating nodes, printing indentation, converting types to strings, and printing the tree.
+
+*/
+
 #include <stdio.h>
 // #include<malloc.h>
 #include <stdlib.h>
 #include "ast.h"
 
 /* uses malloc to create an ASTnode and passes back the heap address of the newley created node */
-//  PRE:  Ast Node Type
+//  PRE:    Ast Node Type
 //  POST:   PTR To heap memory and ASTnode set and all other pointers set to NULL
 ASTnode *ASTCreateNode(enum ASTtype mytype)
 
@@ -34,23 +45,20 @@ ASTnode *ASTCreateNode(enum ASTtype mytype)
 }
 
 /*  Helper function to print tabbing */
-// PRE:  Number of spaces desired
-// POST:  Number of spaces printed on standard output
-
+// PRE:   Number of spaces desired
+// POST:  Number of spaces printed on standard output. This will print 3 spaces for each "howmany"
 void PT(int howmany)
 {
-  // MISSING
   for (int i=0; i<howmany; i++){
     printf("   ");
   }
 }
 
-//  PRE:  A declaration type
-//  POST:  A character string that is the name of the type
-//          Typically used in formatted printing
+//  PRE:   A declaration type
+//  POST:  A character string that is the name of the type. We have two options here, either INT or VOID.
+//  if my mytype is any other value than A_INTTYPE or A_VOIDTYPE then it will return VOID
 char *ASTtypeToString(enum AST_MY_DATA_TYPE mytype)
 {
-  // Missing
   if (mytype == A_INTTYPE)
   {
     return "INT";
@@ -64,7 +72,6 @@ char *ASTtypeToString(enum AST_MY_DATA_TYPE mytype)
 /*  Print out the abstract syntax tree */
 // PRE:   PRT to an ASTtree
 // POST:  indented output using AST order printing with indentation
-
 void ASTprint(int level, ASTnode *p)
 {
   int i;
@@ -72,14 +79,19 @@ void ASTprint(int level, ASTnode *p)
     return;
   switch (p->type)
   {
+
+  // handles variable declaratio, e.g. (int x;), (int x[100];), (int x, x[200];)
   case A_VARDEC:
     PT(level);
     printf("Variable %s %s", ASTtypeToString(p->my_data_type), p->name);
-    if(p->value != NULL) printf("[%d]", p->value);
+    // if variable is an array, print its size along with square brackets
+    if(p->value != 0) printf("[%d]", p->value);
     printf("\n");
     ASTprint(level, p->s1);
     ASTprint(level, p->next);
     break;
+
+  // handles function declarations, e.g. (int func(int a, int b, int c){ ... })
   case A_FUNCTIONDEC:
     PT(level);
     printf("Function %s %s ", ASTtypeToString(p->my_data_type), p->name);
@@ -88,6 +100,8 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level + 1, p->s2); // compound
     ASTprint(level, p->next);
     break;
+
+  // handles the compound statement of a function declaration
   case A_COMPOUND:
     PT(level);
     printf("Compound Statement ");
@@ -96,6 +110,8 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level + 1, p->s2); // statement list
     ASTprint(level, p->next);
     break;
+
+  // handles the write expression, e.g. (write "hello";)
   case A_WRITE:
     PT(level);
     if (p->name != NULL)
@@ -110,12 +126,15 @@ void ASTprint(int level, ASTnode *p)
     printf("\n");
     ASTprint(level, p->next);
     break;
+
+  // handles standalone numbers
   case A_NUM:
     PT(level);
     printf("NUMBER value %d", p->value);
     printf("\n");
     break;
 
+  // handles expressions that involve using operators, e.g. (a+b), (a==5)
   case A_EXPR:
     PT(level);
     printf("EXPRESSION Operator ");
@@ -150,6 +169,7 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level+1, p->s2);
     break;
 
+  // handles the parameter of a function declaration
   case A_PARAM:
     PT(level);
     printf("Parameter %s %s ", ASTtypeToString(p->my_data_type), p->name);
@@ -157,6 +177,7 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level, p->next);
     break; 
 
+  // handles if statements
   case A_IF:
     PT(level);
     printf("IF STATEMENT\n");
@@ -174,6 +195,7 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level, p->next);
     break;
   
+  // handles variables that appear in expressions
   case A_VAR:
     PT(level);
     printf("VARIABLE %s", p->name);
@@ -187,6 +209,8 @@ void ASTprint(int level, ASTnode *p)
       printf("]\n");
     }
     break;
+
+  // handles while loops
   case A_WHILE:
     PT(level);
     printf("WHILE expression\n");
@@ -198,6 +222,7 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level, p->next);
     break;
 
+  // handles variable assignments, e.g. (a = 5;)
   case A_ASSIGN:
     PT(level);
     printf("ASSIGMENT STATEMENT\n");
@@ -210,6 +235,7 @@ void ASTprint(int level, ASTnode *p)
 
     break;
 
+  // handles return statements (usually found in function compound statements)
   case A_RETURN:
     PT(level);
     printf("RETURN STATEMENT\n");
@@ -221,6 +247,7 @@ void ASTprint(int level, ASTnode *p)
 
     break;
 
+  // handles read statements, e.g. (read a;)
   case A_READ:
     PT(level);
     printf("READ Expression\n");
@@ -229,6 +256,7 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level, p->next);
     break;
 
+  // handles functions calls, e.g. (a = func(1, 2);)
   case A_CALL:
     PT(level);
     printf("CALL STATEMENT function %s\n", p->name);
@@ -238,6 +266,7 @@ void ASTprint(int level, ASTnode *p)
     ASTprint(level, p->next);
     break;
   
+  // handles the arguments inside a function call
   case A_ARG:
     PT(level);
     printf("CALL argument\n");
@@ -252,9 +281,3 @@ void ASTprint(int level, ASTnode *p)
     printf("unknown AST Node type %d in ASTprint\n", p->type);
   }
 }
-
-/* dummy main program so I can compile for syntax error independently
-main()
-{
-}
-*/

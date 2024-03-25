@@ -1,5 +1,5 @@
 # CS370 Lab 6
-# February 26, 2024
+# March 25, 2024
 # Yosif Yosif
 # Makefile for Lab 6. It uses lex, yacc, and gcc to compile the program
 

@@ -1,14 +1,9 @@
 /*
     Yosif Yosif
-    Lab 5
-    February 26, 2024
+    Lab 6
+    March 26, 2024
     Description:
-      In this lab, we will implement the C-Minus syntax analysis in LEX.
-      We made tokens for every reserved word such as "if", "else", "while", etc.
-      and tokens for symbols such as "<=", "==", "!=", etc. Also, in this lexical
-      analysis, we define variable names as strings that start with a letter and
-      and may include a "_". However, it can't have numbers. We also define numbers
-      as any digit from 0-9.
+      We don't change anything here from lab 5.
 
 */
 

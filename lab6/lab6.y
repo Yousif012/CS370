@@ -1,11 +1,10 @@
 /*
     Yosif Yosif
-    Lab 5
-    February 26, 2024
+    Lab 6
+    March 25, 2024
     Description:
-      In this file, we will introduce every rule according to the given document
-	  that has a set of rules for the C-minus language syntax. We will also print out
-	  debug statements for each time we find a Var, Var_List, Fun_Declaration, Param, and CALL.
+      In this file, we add semantic actions to every rule in the file in order to implement
+	  the Abstract Synatax Tree.
 
 */
 
@@ -190,6 +189,7 @@ Expression_Stmt : Expression ';' { $$ = $1; }
 				| ';' { $$ = NULL; }
 				;
 
+/* We will create another node A_IFBODY to handle the contents of the ELSE statement if it exists */
 Selection_Stmt : T_IF '(' Expression ')' Statement
 				{
 				 $$ = ASTCreateNode(A_IF);
@@ -232,7 +232,6 @@ Read_Stmt : T_READ Var ';'
 		  }
 		  ;
 
-/* need to do write string */
 Write_Stmt : T_WRITE T_STRING ';' 
 		   { 
 			 $$ = ASTCreateNode(A_WRITE);
