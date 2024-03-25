@@ -1,31 +1,102 @@
-Var_LIST with value x on line 4
-Var_LIST with value x on line 5
-Var_LIST with value x on line 5
-PARAM with value a on line 7
-PARAM with value b on line 7
-PARAM with value a on line 7
-Var_LIST with value A on line 8
-Var_LIST with value x on line 8
-Var with value x on lineno 10
-Var with value y on lineno 11
-Var with value x on lineno 12
-Var with value A on lineno 14
-CALL with value f on lineno 14
-Var with value A on lineno 16
-CALL with value f on lineno 16
-Var with value A on lineno 17
-CALL with value f on lineno 17
-Var with value x on lineno 19
-Var with value x on lineno 19
-Var with value x on lineno 21
-Var with value x on lineno 22
-Var with value x on lineno 23
-FunDec with value main on line 25
-FunDec with value f on line 27
-Var_LIST with value A on line 29
-Var_LIST with value x on line 29
-Var_LIST with value A on line 30
-Var_LIST with value x on line 31
-Var_LIST with value A on line 31
-Var_LIST with value B on line 32
-Var_LIST with value A on line 32
+Finished parsing
+Variable VOID x
+Variable VOID y
+Variable VOID z[100]
+Variable INT x[100]
+Function INT main 
+   Compound Statement 
+      Variable INT x
+      Compound Statement 
+         Variable INT y
+         WHILE expression
+            EXPRESSION Operator <=
+               EXPRESSION Operator PLUS
+                  VARIABLE x
+                  EXPRESSION Operator /
+                     NUMBER value 5
+                     NUMBER value 2
+               EXPRESSION Operator PLUS
+                  NUMBER value 2
+                  EXPRESSION Operator MINUS
+                     VARIABLE z
+                     NUMBER value 5
+         WHILE body
+            Compound Statement 
+               IF STATEMENT
+                  IF expression
+                     EXPRESSION Operator >=
+                        EXPRESSION Operator MINUS
+                           VARIABLE h
+                           NUMBER value 2
+                        EXPRESSION Operator MINUS
+                           NUMBER value 3
+                           NUMBER value 2
+                  IF body
+                     READ Expression
+                        VARIABLE x
+                        [
+                           NUMBER value 100
+                        ]
+                  ELSE body
+                     Write Expression
+                        EXPRESSION Operator PLUS
+                           VARIABLE x
+                           [
+                              NUMBER value 100
+                           ]
+                           NUMBER value 200
+
+               CALL STATEMENT function f
+                  CALL argument
+                     EXPRESSION Operator PLUS
+                        NUMBER value 3
+                        VARIABLE x
+                        [
+                           VARIABLE x
+                           [
+                              NUMBER value 100
+                           ]
+                        ]
+                  CALL argument
+                     EXPRESSION Operator PLUS
+                        VARIABLE bar
+                        NUMBER value 200
+                  CALL argument
+                     NUMBER value 20
+               RETURN STATEMENT
+               RETURN STATEMENT
+                  EXPRESSION Operator PLUS
+                     VARIABLE x
+                     EXPRESSION Operator PLUS
+                        NUMBER value 5
+                        NUMBER value 7
+               IF STATEMENT
+                  IF expression
+                     EXPRESSION Operator >
+                        EXPRESSION Operator PLUS
+                           VARIABLE x
+                           NUMBER value 10
+                        EXPRESSION Operator TIMES
+                           NUMBER value 10
+                           NUMBER value 20
+                  IF body
+                     ASSIGMENT STATEMENT
+                        VARIABLE x
+                     is assigned
+                        EXPRESSION Operator !=
+                           VARIABLE x
+                           NUMBER value 10
+               Write Expression
+                  EXPRESSION Operator !=
+                     EXPRESSION Operator <
+                        NUMBER value 3
+                        NUMBER value 5
+                     EXPRESSION Operator >=
+                        NUMBER value 5
+                        NUMBER value 2
+
+Function VOID f 
+   Parameter INT x 
+   Parameter VOID y 
+   Parameter VOID z 
+   Compound Statement 
