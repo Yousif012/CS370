@@ -1,230 +1,187 @@
-/*
- 
-CS370 Lab 4
-February 5, 2024
-Yosif Yosif
+/*  Symbol Table --linked list
+    Used for Compilers class
 
-Description:
-In this lab, we modify this file by adding a new function
+    Modified Spring 2015 to allow for name to pointed to by symtable, instead of copied, since the name is copied
+    into the heap
 
-This new function is called FetchAddress. It takes a string that resembles a symbol
-and then returns the address of this symbol if found in the symbol table. If not found,
-the program will exit.
+    Modified to have levels.  A level 0 means global variable, other levels means in range of the function.  We
+    start out our offsets at 0 (from stack pointer) for level 1,,,when we enter a functional declaration.
+    We increment offset each time we insert a new variable.  A variable is considered to be valid if it is found in
+    the symbol table at our level or lesser level.  If at 0, then it is global.  
 
-We find the symbol and return its address by iterating over the linked list and comparing
-the value of each node with the wanted value. if found, we return the address.
+    We return a pointer to the symbol table when a variable matches our creteria.
 
+    We add a routine to remove variables at our level and above.
 */
 
-
-
-
-#include <stdio.h>
-/* #include<conio.h> */
-#include <malloc.h>
+    
 #include <string.h>
-#include <stdlib.h>
+#include "symtable.h"
 
-#include "symbtab.h"
+int GTEMP=0;  /* Global Temp counter */
 
-int size = 0;
-struct SymbTab *first, *last;
+// PRE:   Assume one up global variable GTEMP
+// POST:  Returns string with the format _t%d and increments the global vairbal
+// USAGE:   creates a variable name that is used to hold temporary, intermediate
+//         values in the runtime enviroment
 
-// PRE CONDITION: No precondition
-// POST CONDITION: prompts the user for input and gives corresponding output
-// Assumptions: assumes user input is valid
-
-/*
-void main()
-{
-    int op, addr;
-    struct SymbTab * y;
-    char sym[100];
-    do
-    {
-        printf("\n\tSYMBOL TABLE IMPLEMENTATION\n");
-        printf("\n\t1.INSERT\n\t2.DISPLAY\n\t3.DELETE\n\t4.SEARCH\n\t5.MODIFY\n\t6.END\n");
-        printf("\n\tEnter your option : ");
-        scanf("%d", &op);
-        switch (op)
-        {
-        case 1:
-            printf("\n\tEnter the symbol : ");
-            scanf("%s", sym);
-            printf("\n\tEnter the address: ");
-            scanf("%d", &addr);
-            Insert(sym, addr);
-            break;
-        case 2:
-            Display();
-            break;
-        case 3:
-            printf("\n\tEnter the symbol to be deleted : ");
-            scanf("%s", sym);
-            Delete(sym);
-            break;
-        case 4:
-            printf("\n\tEnter the symbol to be searched : ");
-            scanf("%s", sym);
-            y = Search(sym);
-            printf("\n\tSearch Result:");
-            if (y != NULL)
-                printf("\n\tThe symbol is present in the symbol table\n");
-            else
-                printf("\n\tThe symbol is not present in the symbol table\n");
-            break;
-        case 5:
-            exit(0);
-        }
-    } while (op < 6);
-
-}*/ /* and of main */
-
-// PRE CONDITION: PTR to character string
-// POST CONDITION: PTR to structure new symbol
-// Assumptions: assumes that the pointer points to a character array
-struct SymbTab *Insert(char *sym, int address)
-{
-    struct SymbTab *n = Search(sym);
-
-    // if symbol already in symbol table, error out
-    // else, add symbol
-    if (n != NULL)
-    {
-        printf("\n\tThe symbol exists already in the symbol table\n\tDuplicate can.t be inserted");
-        return NULL;
-    }
-    else
-    {
-        // copy the given symbol and address into a SymbTab structure
-        struct SymbTab *p;
-        p = malloc(sizeof(struct SymbTab));
-        p->symbol = strdup(sym);
-        strcpy(p->symbol, sym);
-        p->addr = address;
-        p->next = NULL;
-
-        // handle if the symbol was the first to be inserted
-        // otherwise, just attach to the end of the linked list
-        if (size == 0)
-        {
-            first = p;
-            last = p;
-        }
-        else
-        {
-            last->next = p;
-            last = p;
-        }
-        size++;
-        printf("\n\tSymbol inserted\n");
-        return p;
-    }
+char * CreateTemp()
+{    char hold[100];
+     char *s;
+     sprintf(hold,"_t%d",GTEMP++);
+     s=strdup(hold);
+     return (s);
 }
 
-// PRE CONDITION: no precondition 
-// POST CONDITION: displays all symbols within the symbol table
-// Assumptions: No assumptions are made
+
+
+
+/* Simple Insert into the symbol table with the size, type level that the name is being inserted into */
+
+// PRE:  given elements for an item in the symbol table
+//  POST:  Inserts an item in the symbol table list provided
+//         the symbol does not exists at the level
+
+struct SymbTab * Insert(char *name, enum AST_MY_DATA_TYPE my_assigned_type, enum  SYMBOL_SUBTYPE subtype, int  level, int mysize, int offset )
+{
+  struct SymbTab * n;
+    n=Search(name,level, 0);
+    if(n!=NULL)
+      {
+      printf("\n\tThe name %s exists at level %d already in the symbol table\n\tDuplicate can.t be inserted",name, level);
+      return (NULL);
+      }
+    else
+    {
+      struct SymbTab *p;
+      p=malloc(sizeof(struct SymbTab));
+      p->name=name;
+      p->offset=offset;  /* assign the offset */
+      p->level=level;  /* assign the level */
+      p->mysize=mysize;  /* assign the size */
+      p->Declared_Type=my_assigned_type;  /* assign the Type */
+      p->SubType=subtype;  /* assign the Function  */
+      p->next=NULL;
+
+   //  Insert the record in the list ... 
+      if(first==NULL)
+      {
+        first=p;
+      }
+      else
+      {
+        p->next=first;
+        first=p;
+      }
+      return (p);
+ 
+    }
+     
+  printf("\n\tLabel inserted\n");
+}
+
+/* print out a single symbol table entry -- for debugging */
+//  PRE:  Ptr to a symtabl structore
+//  POST:  output to the screen in human readable form
+void PrintSym(struct SymbTab *s)
+{
+         printf("\t%s\t\t%d\t\t%d\n",s->name,s->offset, s->level);
+
+}
+
+
+/*  General display to see what is our symbol table */
+
+//  PRE:  depends on global variable first
+//  POST:  Formatted output of the symbol table
+
 void Display()
 {
-    int i;
-    struct SymbTab *p;
-    p = first;
-    printf("\n\tSYMBOL\t\tADDRESS\n");
-    // go through the linked list and print its contents
-    for (i = 0; i < size; i++)
-    {
-        printf("\t%s\t\t%d\n", p->symbol, p->addr);
-        p = p->next;
-    }
+   int i;
+   struct SymbTab *p;
+   p=first;
+   printf("\n\tLABEL\t\tOffset \t LEVEL\n");
+      while (p!=NULL)
+      {
+         PrintSym(p);
+         p=p->next;
+      }
 }
 
-// PRE CONDITION: PTR to character string
-// POST CONDITION: PTR to matching structure or NULL
-// Assumptions: assumes that the pointer points to a character array
-struct SymbTab *Search(char *sym)
+/*  Search for a symbol name at level or below.  We have to do multiple passes into the symbol table because we have to find
+   the name closest to us 
+
+
+  If recur is non-zero, then we look through all of the levels, otherwise, only our level 
+   We return a pointer to a SymbolTab structure so that we can use other functions/methods to get the attributes */
+
+ 
+
+
+// PRE:   given a name and level and recure
+//  POST:  returns NULL if not there, otherwise a PTR to the element in the table
+// DETAIL:  search will stop at first level if recur set to 0
+//          search will continue struct until level is 0 if recur is 1 
+struct SymbTab * Search(char name[], int level, int recur)
 {
-    int i, flag = 0;
-    struct SymbTab *p;
-    p = first;
+   int i,flag=0;
+   struct SymbTab *p;
 
-    // go through the linked list and check and match contents with the given symbol
-    for (i = 0; i < size; i++)
+  /* for each level, try to find our symbol */
+   while (level >= 0)
     {
-        // check if symbol matches
-        if (strcmp(p->symbol, sym) == 0){
-            flag = 1;
-            return p;
-        }
-        p = p->next;
-    }
-    return NULL;
-}
-
-// PRE CONDITION: PTR to character string
-// POST CONDITION: no post condition, either deletes the symbol or not
-// Assumptions: assumes that the pointer points to a character array
-void Delete(char *sym)
-{
-    struct SymbTab *a;
-    struct SymbTab *p, *q;
-    p = first;
-
-    a = Search(sym);
-    // if symbol not in symbol table, no need to delete
-    // else, find and delete symbol
-    if (a == NULL)
-        printf("\n\tSymbol not found\n");
-
-    // change pointers in the linked list when a node is removed
-    else
-    {
-        // check if symbol is first in the list
-        // if not, check if it is last
-        // else, go over the list and check every item
-        if (strcmp(first->symbol, sym) == 0)
-            first = first->next;
-        else if (strcmp(last->symbol, sym) == 0)
+       p=first;
+       while (p!=NULL)
         {
-            q = p->next;
-            while (strcmp(q->symbol, sym) != 0)
-            {
-                p = p->next;
-                q = q->next;
-            }
-            p->next = NULL;
-            last = p;
+         if((strcmp(p->name,name)==0) && (p->level == level))
+           return p;
+         p=p->next;
+        }
+       if (recur == 0) return (NULL);   /* we did not find it at our level */
+       level--; /* check the next level up */
+    }
+
+
+   return  NULL;  /* did not find it, return 0 */
+}
+
+/* Remove all enteries that have the indicated level
+   We need to take care about updating first pointer into the linked list when we are deleting edge elements */
+
+// PRE:  level
+// POST:  removes all symbol table entrues with level equal to or higher
+
+int Delete(int level)
+{
+    struct SymbTab *p,*f=NULL;  /* we follow with pointer f */
+    int SIZE=0;
+    p=first;
+
+    
+    
+  /* cruise through the list */
+
+    while (p != NULL)
+      {
+        /* do we match? */
+        if (p->level>= level )
+        { /* if it is the first in the list we have to update first, we know this by f being NULL */
+           SIZE+=p->mysize;
+           if ( f==NULL) first=p->next;
+           else /* not the first element */
+              {f->next=p->next;
+              }
+            p=p->next;
+           
         }
         else
-        {
-                q = p->next;
-                // slow and fast pointers to the list, so when we find the right node
-                // we can easily remove the node and change pointers
-                while (strcmp(q->symbol, sym) != 0){
-                    p=p->next;
-                    q = q->next;
-                    }
-            p->next = q->next;
-        }
-        size--;
-        printf("\n\tAfter Deletion:\n");
-        Display();
-    }
+         {
+               /* update follow pointer, move the p pointer */
+                f=p;
+                p=p->next;
+          }
+
+      }
+    return(SIZE);
 }
 
-
-// PRE CONDITION: PTR to character string
-// POST CONDITION: address of symbol if found, otherwise BARF
-// Assumptions: no assumptions
-int FetchAddress(char *s){
-    struct SymbTab *p;
-    p = first;
-
-    while (p != NULL){
-        if(strcmp(p->symbol, s) == 0) return p->addr;
-        p = p->next;
-    }
-    printf("variable doesn't exist");
-    exit(1);
-    return -1;
-}

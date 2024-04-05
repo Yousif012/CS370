@@ -1,1 +1,7 @@
-int main(int x, void y[]) { 1+2; write "hello";; }
+int x;
+
+int main(int y){
+    int x;
+    main(void);
+    
+}

@@ -8,7 +8,7 @@ all: lab7
 lab7: lab7.l lab7.y ast.h ast.c
 	lex lab7.l
 	yacc -d lab7.y
-	gcc -o lab7 ast.c lex.yy.c y.tab.c
+	gcc -o lab7 ast.c lex.yy.c y.tab.c symtable.c
 
 clean:
 	rm -f lab7 lex.yy.c y.tab.c y.tab.h

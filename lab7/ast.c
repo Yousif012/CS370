@@ -293,3 +293,15 @@ void ASTprint(int level, ASTnode *p)
     printf("unknown AST Node type %d in ASTprint\n", p->type);
   }
 }
+
+// PRE : PTRS to actual and formals
+// POST: 0 if they are not same type or length
+//       1 if they are same type and length
+int check_params(ASTnode *actuals, ASTnode *formals){
+  if(actuals == NULL && formals == NULL) return 1;
+  if(actuals == NULL || formals == NULL) return 0;
+  printf("%s %s \n", actuals->my_data_type, formals->my_data_type);
+  if(actuals->my_data_type != formals->my_data_type) return 0;
+
+  return check_params(actuals->next, formals->next);
+}

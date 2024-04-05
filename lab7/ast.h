@@ -97,4 +97,7 @@ void PT(int howmany);
 /*  Print out the abstract syntax tree */
 void ASTprint(int level,ASTnode *p);
 
+// parameter checking
+int check_params(ASTnode *actuals, ASTnode *formals);
+
 #endif // of AST_H

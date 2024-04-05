@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "ast.h" 
+#include "symtable.h"
 
 
 int yylex();
@@ -23,6 +24,7 @@ extern int mydebug;
 extern int linecount;
 
 int LEVEL = 0; // global variable to know how far deep we are
+int OFFSET = 0; // global variable for size of program
 
 ASTnode * PROGRAM;
 
@@ -88,7 +90,30 @@ Var_Declaration : Type_Specifier Var_List ';'
 				  ASTnode *p = $2;
 				  while ( p != NULL ){
 					p->my_data_type = $1;
+
+					// check if variable already defined at current level
+					if(Search(p->name, LEVEL, 0) != NULL){
+						// if symbol found, BARF
+						yyerror(p->name);
+						yyerror("Symbol already defined");
+						exit(1);
+					}
+					// variable not in symbol table
+
+					// variable is scalar
+					if(p->value == 0){
+						Insert(p->name, p->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+						OFFSET += 1;
+					}
+
+					// variable is array
+					else{
+						Insert(p->name, p->my_data_type, SYM_ARRAY, LEVEL, p->value, OFFSET);
+						OFFSET += p->value;
+					}
+
 					p = p->s1;
+
 				  }
 				  $$ = $2; 
 				}
@@ -120,13 +145,30 @@ Var_List : T_ID
 		   }
 		 ;
 
-Fun_Declaration : Type_Specifier T_ID '(' Params ')' Compound_Stmt
+Fun_Declaration : Type_Specifier T_ID 
+				{
+					// check if function has been defined
+					if(Search($2, LEVEL, 0) != NULL){
+						// T_ID has already been used, BARF
+						yyerror($2);
+						yyerror("function name already in use");
+						exit(1);
+					}
+					// not in symbol table, insert it
+					Insert($2, $1, SYM_FUNCTION, LEVEL, 0, 0);
+
+				}
+				
+				  '(' Params ')' Compound_Stmt
 				{ 
+				  struct SymbTab *p;
+				  p = Search($2, LEVEL, 0);
+				  p->fparms = $5; 
 				  $$ = ASTCreateNode(A_FUNCTIONDEC);
 				  $$->name = $2;
 				  $$->my_data_type = $1;
-				  $$->s1 = $4;
-				  $$->s2 = $6;
+				  $$->s1 = $5;
+				  $$->s2 = $7;
 				}
 				;
 
@@ -153,11 +195,19 @@ Param : Type_Specifier T_ID
 		}
 	  ;
 
-Compound_Stmt : '{' Local_Declarations Statement_List '}'
+Compound_Stmt : '{' 
+			  { 
+				LEVEL ++; 
+			  } 
+			  	Local_Declarations Statement_List '}'
 			  {
 				$$ = ASTCreateNode(A_COMPOUND);
-				$$->s1 = $2;
-				$$->s2 = $3;
+				$$->s1 = $3;
+				$$->s2 = $4;
+
+				Display();
+				Delete(LEVEL);
+				LEVEL --;
 			  }
 			  ;
 
@@ -261,11 +311,43 @@ Assignment_Stmt : Var '=' Simple_Expression ';'
 
 Var : T_ID 
 	{ 
+		struct SymbTab *p;
+		p = Search($1, LEVEL, 1);
+		if(p == NULL){
+			// variable not defined within scope
+			yyerror($1);
+			yyerror("symbol used but not defined");
+			exit(1);
+		}
+
+		if (p->SubType != SYM_SCALAR){
+			// variable is used as scalar but not scalar
+			yyerror($1);
+			yyerror("symbol must be scalar");
+			exit(1);
+		}
+
 		$$ = ASTCreateNode(A_VAR);
 	   	$$->name = $1;
 	}
 	| T_ID '[' Expression ']'
 	{ 
+		struct SymbTab *p;
+		p = Search($1, LEVEL, 1);
+		if(p == NULL){
+			// variable not defined within scope
+			yyerror($1);
+			yyerror("symbol used but not defined");
+			exit(1);
+		}
+
+		if (p->SubType != SYM_ARRAY){
+			// variable is used as array but not array
+			yyerror($1);
+			yyerror("symbol must be array");
+			exit(1);
+		}
+
 		$$ = ASTCreateNode(A_VAR);
 	   	$$->name = $1;
 		$$->s1 = $3;
@@ -335,7 +417,32 @@ Factor : '(' Expression ')' { $$ = $2; }
 	   ;
 
 Call : T_ID '(' Args ')'  
-	 { $$ = ASTCreateNode(A_CALL);
+	 { 
+		struct SymbTab *p;
+		p = Search($1, 0, 0);
+		if(p == NULL){
+			// function not defined
+			yyerror($1);
+			yyerror("function not defined");
+			exit(1);
+		}
+
+		// name is there but is it a function?
+		if(p->SubType != SYM_FUNCTION){
+			// function name is not related to a function declaration but to a variable
+			yyerror($1);
+			yyerror("not defined as function");
+			exit(1);
+		}
+
+		// check if parameters length and type are correct
+		if(check_params($3, p->fparms) == 0){
+			yyerror($1);
+			yyerror("Actual and Formals do not match");
+			exit(1);
+		}
+		
+	   $$ = ASTCreateNode(A_CALL);
 	   $$->name = $1;
 	   $$->s1 = $3;
 	 }
@@ -361,5 +468,9 @@ Args_List : Expression
 int main()
 { yyparse();
   printf("Finished parsing\n");
+  
+  Display(); // shows our global variables
+
+  printf("\n\n\nAST PRINT \n\n\n");
   ASTprint(0, PROGRAM);
 }
