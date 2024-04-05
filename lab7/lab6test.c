@@ -1,0 +1,1 @@
+int main(int x, void y[]) { 1+2; write "hello";; }
