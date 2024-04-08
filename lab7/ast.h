@@ -22,6 +22,7 @@
 #include<stdio.h>
 //#include<malloc.h>
 #include <stdlib.h>
+#include "symtable.h"
 
 #ifndef AST_H
 #define AST_H
@@ -84,6 +85,7 @@ typedef struct ASTnodetype
      int value;
      enum AST_MY_DATA_TYPE my_data_type;
      ///.. missing
+     struct SymbTab *symbol;
      struct ASTnodetype *s1,*s2, *next ; /* used for holding IF and WHILE components -- not very descriptive */
 } ASTnode;
 

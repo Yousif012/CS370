@@ -40,6 +40,7 @@ ASTnode *ASTCreateNode(enum ASTtype mytype)
   p->s1 = NULL;
   p->s2 = NULL;
   p->next = NULL;
+  p->symbol = NULL;
   p->value = 0;
   return (p);
 }
@@ -83,9 +84,12 @@ void ASTprint(int level, ASTnode *p)
   // handles variable declaratio, e.g. (int x;), (int x[100];), (int x, x[200];)
   case A_VARDEC:
     PT(level);
-    printf("Variable %s %s", ASTtypeToString(p->my_data_type), p->name);
+    printf("Variable %s %s", 
+    ASTtypeToString(p->my_data_type), 
+                    p->name);
     // if variable is an array, print its size along with square brackets
     if(p->value != 0) printf("[%d]", p->value);
+    printf(" level %d offset %d", p->symbol->level, p->symbol->offset);
     printf("\n");
     ASTprint(level, p->s1);
     ASTprint(level, p->next);
@@ -198,7 +202,7 @@ void ASTprint(int level, ASTnode *p)
   // handles variables that appear in expressions
   case A_VAR:
     PT(level);
-    printf("VARIABLE %s", p->name);
+    printf("VARIABLE %s level %d offset %d", p->name, p->symbol->level, p->symbol->offset);
     printf("\n");
 
     if(p->s1 != NULL){
@@ -298,9 +302,16 @@ void ASTprint(int level, ASTnode *p)
 // POST: 0 if they are not same type or length
 //       1 if they are same type and length
 int check_params(ASTnode *actuals, ASTnode *formals){
+  ASTnode *temp1, *temp2;
+  temp1 = actuals;
+  temp2 = formals;
+
+
   if(actuals == NULL && formals == NULL) return 1;
   if(actuals == NULL || formals == NULL) return 0;
-  printf("%s %s \n", actuals->my_data_type, formals->my_data_type);
+
+  printf("check params %d %d\n", actuals->my_data_type, formals->my_data_type);
+
   if(actuals->my_data_type != formals->my_data_type) return 0;
 
   return check_params(actuals->next, formals->next);

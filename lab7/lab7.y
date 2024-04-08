@@ -25,6 +25,8 @@ extern int linecount;
 
 int LEVEL = 0; // global variable to know how far deep we are
 int OFFSET = 0; // global variable for size of program
+int GOFFSET = 0; // global variable for global variable offset
+int maxOffset = 0; // largest offset needed for function
 
 ASTnode * PROGRAM;
 
@@ -87,6 +89,7 @@ Var_Declaration : Type_Specifier Var_List ';'
 				{ 
 				  // populate the s1 connected list with the
 				  // defined type via $1
+
 				  ASTnode *p = $2;
 				  while ( p != NULL ){
 					p->my_data_type = $1;
@@ -102,13 +105,13 @@ Var_Declaration : Type_Specifier Var_List ';'
 
 					// variable is scalar
 					if(p->value == 0){
-						Insert(p->name, p->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+						p->symbol = Insert(p->name, p->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
 						OFFSET += 1;
 					}
 
 					// variable is array
 					else{
-						Insert(p->name, p->my_data_type, SYM_ARRAY, LEVEL, p->value, OFFSET);
+						p->symbol = Insert(p->name, p->my_data_type, SYM_ARRAY, LEVEL, p->value, OFFSET);
 						OFFSET += p->value;
 					}
 
@@ -157,18 +160,22 @@ Fun_Declaration : Type_Specifier T_ID
 					// not in symbol table, insert it
 					Insert($2, $1, SYM_FUNCTION, LEVEL, 0, 0);
 
+					GOFFSET = OFFSET;
+					OFFSET = 0;
+					maxOffset = OFFSET;
 				}
-				
-				  '(' Params ')' Compound_Stmt
+				'(' Params ')'
 				{ 
-				  struct SymbTab *p;
-				  p = Search($2, LEVEL, 0);
-				  p->fparms = $5; 
-				  $$ = ASTCreateNode(A_FUNCTIONDEC);
-				  $$->name = $2;
-				  $$->my_data_type = $1;
-				  $$->s1 = $5;
-				  $$->s2 = $7;
+				  Search($2, LEVEL, 0)->fparms = $5;
+				}
+				Compound_Stmt 
+				{ 
+					$$ = ASTCreateNode(A_FUNCTIONDEC);
+				    $$->name = $2;
+				    $$->my_data_type = $1;
+				    $$->s1 = $5;
+					$$->s2 = $8; 
+					OFFSET = GOFFSET;
 				}
 				;
 
@@ -179,19 +186,33 @@ Params : T_VOID { $$ = NULL; }
 Params_List : Param { $$ = $1; }
 			| Param ',' Params_List
 			{ $$ = $1; 
-			  if($1 != NULL) $$->next = $3; }
+			  $$->next = $3; }
 			;
 Param : Type_Specifier T_ID
 		{ 
+		  if(Search($2, LEVEL+1, 0) != NULL){
+			yyerror($2);
+			yyerror("Parameter already used");
+			exit(1);
+		  }
 		  $$ = ASTCreateNode(A_PARAM);
 		  $$->name = $2;
 		  $$->my_data_type = $1;
+		  $$->symbol = Insert($$->name, $$->my_data_type, SYM_SCALAR, LEVEL+1, 1, OFFSET);
+		  OFFSET++;
 		}
 	  | Type_Specifier T_ID '[' ']'
 	  	{ 
+		  if(Search($2, LEVEL+1, 0) != NULL){
+			yyerror($2);
+			yyerror("Parameter already used");
+			exit(1);
+		  }
 		  $$ = ASTCreateNode(A_PARAM);
 		  $$->name = $2;
 		  $$->my_data_type = $1;
+		  $$->symbol = Insert($$->name, $$->my_data_type, SYM_SCALAR, LEVEL+1, 1, OFFSET);
+		  OFFSET++;
 		}
 	  ;
 
@@ -206,7 +227,8 @@ Compound_Stmt : '{'
 				$$->s2 = $4;
 
 				Display();
-				Delete(LEVEL);
+				if(OFFSET > maxOffset) maxOffset = OFFSET;
+				OFFSET -= Delete(LEVEL);
 				LEVEL --;
 			  }
 			  ;
@@ -303,9 +325,16 @@ Write_Stmt : T_WRITE T_STRING ';'
 
 Assignment_Stmt : Var '=' Simple_Expression ';'
 				{
+					if($1->my_data_type != $3->my_data_type){
+						yyerror("Type Mismatch");
+						exit(1);
+					 }
 					$$ = ASTCreateNode(A_ASSIGN);
 					$$->s1 = $1;
 					$$->s2 = $3;
+					$$->name = CreateTemp();
+					$$->symbol = Insert($$->name, $1->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+					OFFSET++;
 				}
 				;
 
@@ -329,6 +358,8 @@ Var : T_ID
 
 		$$ = ASTCreateNode(A_VAR);
 	   	$$->name = $1;
+		$$->symbol = p;
+		$$->my_data_type = p->Declared_Type;
 	}
 	| T_ID '[' Expression ']'
 	{ 
@@ -351,6 +382,7 @@ Var : T_ID
 		$$ = ASTCreateNode(A_VAR);
 	   	$$->name = $1;
 		$$->s1 = $3;
+		$$->symbol = p;
 	}
 	;
 
@@ -360,10 +392,17 @@ Expression : Simple_Expression { $$ = $1; }
 Simple_Expression : Additive_Expression { $$ = $1; }
 				  | Additive_Expression relop Additive_Expression 
 					{
+					if($1->my_data_type != $3->my_data_type){
+						yyerror("Type Mismatch");
+						exit(1);
+					 }
 					 $$ = ASTCreateNode(A_EXPR); 
 					 $$->s1 = $1;
 					 $$->s2 = $3;
 					 $$->operator = $2;
+					 $$->name = CreateTemp();
+					 $$->symbol = Insert($$->name, $1->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+					 OFFSET++;
 					}
 
 relop : T_LET { $$ = A_LET; } 
@@ -378,10 +417,18 @@ relop : T_LET { $$ = A_LET; }
 Additive_Expression : Term { $$ = $1; }
 				    | Term Addop Additive_Expression 
 					{
+					 if($1->my_data_type != $3->my_data_type){
+						yyerror("Type Mismatch");
+						exit(1);
+					 }
 					 $$ = ASTCreateNode(A_EXPR);
 					 $$->s1 = $1;
 					 $$->s2 = $3;
 					 $$->operator = $2;
+					 $$->my_data_type = $1->my_data_type;
+					 $$->name = CreateTemp();
+					 $$->symbol = Insert($$->name, $1->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+					 OFFSET++;
 					}
 					; 
 
@@ -391,10 +438,18 @@ Addop : T_ADD { $$ = A_PLUS; }
 Term : Factor { $$ = $1; }
 	 | Factor Multop Term 
 	 { 
+		if($1->my_data_type != $3->my_data_type){
+			yyerror("Type Mismatch");
+			exit(1);
+		}
 		$$ = ASTCreateNode(A_EXPR);
 		$$->s1 = $1;
 		$$->s2 = $3;
 		$$->operator = $2;
+		$$->my_data_type = $1->my_data_type;
+		$$->name = CreateTemp();
+		$$->symbol = Insert($$->name, $1->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+		OFFSET++;
 	 } 
 	 ;
 
@@ -405,6 +460,7 @@ Factor : '(' Expression ')' { $$ = $2; }
 	   { 
 		 $$ = ASTCreateNode(A_NUM);
 	   	 $$->value = $1; 
+		 $$->my_data_type = A_INTTYPE;
 	   }
 	   | Var { $$ = $1; }
 	   | Call { $$ = $1; }
@@ -413,6 +469,7 @@ Factor : '(' Expression ')' { $$ = $2; }
 		$$ = ASTCreateNode(A_EXPR);
 		$$->operator = A_UMINUS;
 		$$->s1 = $2; 
+		$$->my_data_type = A_INTTYPE;
 	   }
 	   ;
 
@@ -445,6 +502,8 @@ Call : T_ID '(' Args ')'
 	   $$ = ASTCreateNode(A_CALL);
 	   $$->name = $1;
 	   $$->s1 = $3;
+	   $$->symbol = p;
+	   $$->my_data_type = p->Declared_Type;
 	 }
 	 ;
 
@@ -454,12 +513,22 @@ Args_List : Expression
 		  { 
 			$$ = ASTCreateNode(A_ARG);
 			$$->s1 = $1;
+			$$->my_data_type = $1->my_data_type;
+
+			$$->name = CreateTemp();
+			$$->symbol = Insert($$->name, $1->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+			OFFSET++;
 		  }
 		  | Expression ',' Args_List
 		  { 
 			$$ = ASTCreateNode(A_ARG);
 			$$->s1 = $1;
-			if($1 != NULL) $$->next = $3;
+			$$->next = $3;
+			$$->my_data_type = $1->my_data_type;
+
+			$$->name = CreateTemp();
+			$$->symbol = Insert($$->name, $1->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+			OFFSET++;
 		  }
 
 
