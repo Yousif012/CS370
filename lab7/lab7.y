@@ -101,8 +101,8 @@ Var_Declaration : Type_Specifier Var_List ';'
 						yyerror("Symbol already defined");
 						exit(1);
 					}
-					// variable not in symbol table
 
+					// variable not in symbol table
 					// variable is scalar
 					if(p->value == 0){
 						p->symbol = Insert(p->name, p->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
@@ -166,6 +166,7 @@ Fun_Declaration : Type_Specifier T_ID
 				}
 				'(' Params ')'
 				{ 
+				  // add ASTnode to the symbol structure
 				  Search($2, LEVEL, 0)->fparms = $5;
 				}
 				Compound_Stmt 
@@ -175,6 +176,13 @@ Fun_Declaration : Type_Specifier T_ID
 				    $$->my_data_type = $1;
 				    $$->s1 = $5;
 					$$->s2 = $8; 
+
+					// change offset in symbol struct
+					struct SymbTab *p;
+					p = Search($2, LEVEL, 0);
+					p->offset = maxOffset;
+					$$->symbol = p;
+					
 					OFFSET = GOFFSET;
 				}
 				;
@@ -190,6 +198,7 @@ Params_List : Param { $$ = $1; }
 			;
 Param : Type_Specifier T_ID
 		{ 
+		  // check if parameter already defined
 		  if(Search($2, LEVEL+1, 0) != NULL){
 			yyerror($2);
 			yyerror("Parameter already used");
@@ -203,6 +212,7 @@ Param : Type_Specifier T_ID
 		}
 	  | Type_Specifier T_ID '[' ']'
 	  	{ 
+		  // check if parameter already defined
 		  if(Search($2, LEVEL+1, 0) != NULL){
 			yyerror($2);
 			yyerror("Parameter already used");
@@ -211,7 +221,7 @@ Param : Type_Specifier T_ID
 		  $$ = ASTCreateNode(A_PARAM);
 		  $$->name = $2;
 		  $$->my_data_type = $1;
-		  $$->symbol = Insert($$->name, $$->my_data_type, SYM_SCALAR, LEVEL+1, 1, OFFSET);
+		  $$->symbol = Insert($$->name, $$->my_data_type, SYM_ARRAY, LEVEL+1, 1, OFFSET);
 		  OFFSET++;
 		}
 	  ;
@@ -227,6 +237,7 @@ Compound_Stmt : '{'
 				$$->s2 = $4;
 
 				Display();
+				// adjust offset and level when exiting compound statement
 				if(OFFSET > maxOffset) maxOffset = OFFSET;
 				OFFSET -= Delete(LEVEL);
 				LEVEL --;
@@ -342,6 +353,8 @@ Var : T_ID
 	{ 
 		struct SymbTab *p;
 		p = Search($1, LEVEL, 1);
+
+		// check if variable defined
 		if(p == NULL){
 			// variable not defined within scope
 			yyerror($1);
@@ -349,6 +362,7 @@ Var : T_ID
 			exit(1);
 		}
 
+		// verify if variable is scalar
 		if (p->SubType != SYM_SCALAR){
 			// variable is used as scalar but not scalar
 			yyerror($1);
@@ -365,6 +379,8 @@ Var : T_ID
 	{ 
 		struct SymbTab *p;
 		p = Search($1, LEVEL, 1);
+
+		// check if variable defined
 		if(p == NULL){
 			// variable not defined within scope
 			yyerror($1);
@@ -372,6 +388,7 @@ Var : T_ID
 			exit(1);
 		}
 
+		// verify if variable is array
 		if (p->SubType != SYM_ARRAY){
 			// variable is used as array but not array
 			yyerror($1);
@@ -392,16 +409,20 @@ Expression : Simple_Expression { $$ = $1; }
 Simple_Expression : Additive_Expression { $$ = $1; }
 				  | Additive_Expression relop Additive_Expression 
 					{
+
+					// check if variables are same type
 					if($1->my_data_type != $3->my_data_type){
 						yyerror("Type Mismatch");
 						exit(1);
 					 }
+
 					 $$ = ASTCreateNode(A_EXPR); 
 					 $$->s1 = $1;
 					 $$->s2 = $3;
 					 $$->operator = $2;
 					 $$->name = CreateTemp();
 					 $$->symbol = Insert($$->name, $1->my_data_type, SYM_SCALAR, LEVEL, 1, OFFSET);
+					 $$->my_data_type = $1->my_data_type;
 					 OFFSET++;
 					}
 
@@ -417,10 +438,13 @@ relop : T_LET { $$ = A_LET; }
 Additive_Expression : Term { $$ = $1; }
 				    | Term Addop Additive_Expression 
 					{
+
+					 // check if variables are same type
 					 if($1->my_data_type != $3->my_data_type){
 						yyerror("Type Mismatch");
 						exit(1);
 					 }
+
 					 $$ = ASTCreateNode(A_EXPR);
 					 $$->s1 = $1;
 					 $$->s2 = $3;
@@ -438,10 +462,13 @@ Addop : T_ADD { $$ = A_PLUS; }
 Term : Factor { $$ = $1; }
 	 | Factor Multop Term 
 	 { 
+
+		// check if variables are same type
 		if($1->my_data_type != $3->my_data_type){
 			yyerror("Type Mismatch");
 			exit(1);
 		}
+		
 		$$ = ASTCreateNode(A_EXPR);
 		$$->s1 = $1;
 		$$->s2 = $3;

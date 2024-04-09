@@ -98,7 +98,7 @@ void ASTprint(int level, ASTnode *p)
   // handles function declarations, e.g. (int func(int a, int b, int c){ ... })
   case A_FUNCTIONDEC:
     PT(level);
-    printf("Function %s %s ", ASTtypeToString(p->my_data_type), p->name);
+    printf("Function %s %s level %d offset %d", ASTtypeToString(p->my_data_type), p->name, p->symbol->level, p->symbol->offset);
     printf("\n");
     ASTprint(level + 1, p->s1); // parameters
     ASTprint(level + 1, p->s2); // compound
@@ -176,7 +176,7 @@ void ASTprint(int level, ASTnode *p)
   // handles the parameter of a function declaration
   case A_PARAM:
     PT(level);
-    printf("Parameter %s %s ", ASTtypeToString(p->my_data_type), p->name);
+    printf("Parameter %s %s level %d offset %d", ASTtypeToString(p->my_data_type), p->name, p->symbol->level, p->symbol->offset);
     printf("\n");
     ASTprint(level, p->next);
     break; 
@@ -306,12 +306,11 @@ int check_params(ASTnode *actuals, ASTnode *formals){
   temp1 = actuals;
   temp2 = formals;
 
-
+  // check if parameters are the same size
   if(actuals == NULL && formals == NULL) return 1;
   if(actuals == NULL || formals == NULL) return 0;
 
-  printf("check params %d %d\n", actuals->my_data_type, formals->my_data_type);
-
+  // check if parameters are the same type
   if(actuals->my_data_type != formals->my_data_type) return 0;
 
   return check_params(actuals->next, formals->next);
