@@ -14,17 +14,15 @@ void EMIT(ASTnode * p, FILE * fp){
     EMIT_STRINGS(p, fp);
     fprintf(fp, ".align 2\n");
     EMIT_GLOBALS(p, fp);
-    fprintf(fp, ".text\n");
-    //EMIT_AST(p, fp);
-
-
+    fprintf(fp, ".text\n\n\n");
+    EMIT_AST(p, fp);
 
 }
 
 
 void EMIT_GLOBALS(ASTnode * p, FILE * fp){
     while (p){
-        if (p->symbol->level == 0 && p->type == A_VARDEC){
+        if (p->type == A_VARDEC && p->symbol->level == 0){
             fprintf(fp, "%s: .space %d\n", p->name, p->symbol->mysize*W_SIZE);
 			ASTnode * varList = p->s1;
             while(varList){
@@ -50,6 +48,30 @@ void EMIT_STRINGS(ASTnode * p, FILE * fp){
     EMIT_STRINGS(p->s2, fp);
 }
 
+void EMIT_AST(ASTnode * p, FILE * fp){
+    if(p == NULL)
+        return;
+    
+    switch (p->type){
+
+        case A_VARDEC:
+            EMIT_AST(p->next, fp);
+            break;
+        
+        case A_FUNCTIONDEC:
+            emit_function(p, fp);
+            EMIT_AST(p->next, fp);
+            break;
+
+
+        default:
+            printf("EMIT_AST case %d not implemented\n", p->type);
+            printf("WE SHOULD NEVER BE HERE\n");
+            exit(1);
+    }
+}
+
+
 char * CreateLabel()
 {
     char hold[100];
@@ -58,4 +80,24 @@ char * CreateLabel()
     s=strdup(hold);
     STRING_COUNT++;
     return (s);
+}
+
+void emit_function(ASTnode * p, FILE * fp){
+
+    emit(fp, p->name, "", "function definition");
+}
+
+
+void emit(FILE *fp, char * label, char * command, char * comment)
+{
+    if (strcmp("", comment) == 0 ) 
+        if (strcmp("",label) == 0)
+            fprintf (fp,"\t%s\t\t\n", command );
+        else
+            fprintf(fp,"%s:\t%s\t\t\n",label, command);
+    else
+        if (strcmp("",label) == 0)
+            fprintf(fp,"\t%s\t\t# %s\n", command, comment);
+        else
+            fprintf(fp,"%s:\t%s\t\t# %s\n",label, command, comment);
 }

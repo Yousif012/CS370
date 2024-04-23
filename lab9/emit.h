@@ -9,7 +9,11 @@
 void EMIT(ASTnode * p, FILE * fp);
 void EMIT_GLOBALS(ASTnode * p, FILE * fp);
 void EMIT_STRINGS(ASTnode * p, FILE * fp);
+void EMIT_AST(ASTnode * p, FILE * fp);
 char * CreateLabel();
+void emit(FILE *fp, char * label, char * command, char * comment);
+void emit_function(ASTnode * p, FILE * fp);
+
 
 
 #endif // of EMIT_H

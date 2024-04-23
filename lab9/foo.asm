@@ -8,3 +8,6 @@ _L1: .asciiz "hi"
 y: .space 4
 Z: .space 400
 .text
+
+
+main:			# function definition
