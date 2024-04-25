@@ -13,6 +13,10 @@ void EMIT_AST(ASTnode * p, FILE * fp);
 char * CreateLabel();
 void emit(FILE *fp, char * label, char * command, char * comment);
 void emit_function(ASTnode * p, FILE * fp);
+void emit_write(ASTnode * p, FILE * fp);
+void emit_expr(ASTnode * p, FILE * fp);
+void emit_read(ASTnode * p, FILE * fp);
+void emit_var(ASTnode * p, FILE * fp);
 
 
 

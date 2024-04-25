@@ -163,7 +163,7 @@ Fun_Declaration : Type_Specifier T_ID
 					Insert($2, $1, SYM_FUNCTION, LEVEL, 0, 0);
 
 					GOFFSET = OFFSET;
-					OFFSET = 0;
+					OFFSET = 2;
 					maxOffset = OFFSET;
 				}
 				'(' Params ')'

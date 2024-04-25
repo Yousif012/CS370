@@ -1,10 +1,17 @@
 int y,Z[100];
 
 
-int main(int arg1, int arg2[])
+int main(void)
 {
-   write  "hello";
-   write  "hi";
+   write  "hello\n";
+   write  "world\n";
+   write 123;
+   write "\n";
+   write "enter a number ";
+   read y;
+   write "you entered: ";
+   write y;
+   write "\n";
 
 
 }

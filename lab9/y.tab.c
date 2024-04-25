@@ -1620,7 +1620,7 @@ yyreduce:
 					Insert((yyvsp[(2) - (2)].string), (yyvsp[(1) - (2)].d_type), SYM_FUNCTION, LEVEL, 0, 0);
 
 					GOFFSET = OFFSET;
-					OFFSET = 0;
+					OFFSET = 2;
 					maxOffset = OFFSET;
 				}
     break;
