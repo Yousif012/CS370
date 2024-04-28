@@ -12,7 +12,7 @@ int main(void)
    write "you entered: ";
    write y;
    write "\n";
-   y = 4;
+   y = 4+3;
    write y;
    write "\n";
 

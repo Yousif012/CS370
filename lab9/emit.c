@@ -206,13 +206,30 @@ void emit_expr(ASTnode * p, FILE * fp){
                  printf("FIX FIX FIX\n");
                  exit(1);
     }
+    
+        
+    // handlee mathematical/logical expressions
+    // result will be in $a0
+    // NEEDS WORK
+    if (p->type == A_EXPR){
+        switch(p->operator){
+            case A_PLUS:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "add $a0, $a1, $a2", "Perform addition");
+            default: printf("Operator %d is not implemented", p->type);
+                     exit(1);
+            }
+
+        }
 }
 
 void emit_assign(ASTnode * p, FILE * fp){
     emit_var(p->s1, fp); // $a0 will be the location of the variable
     emit(fp, "", "addi $a1, $a0, 0", "Load location of variable into $a1");
     emit_expr(p->s2, fp);
-    emit(fp, "", "sw $a0 ($a1)", "Assign new value to variable");
+    emit(fp, "", "sw $a0 $a1", "Assign new value to variable");
 }
 
 

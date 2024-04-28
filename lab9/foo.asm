@@ -17,7 +17,7 @@ Z: .space 400
 
 main:			# function definition
 	move $a1, $sp		# Activation Record carve out copy SP
-	subi $a1, $a1, 12		# Activation Record carve out copy size of function
+	subi $a1, $a1, 16		# Activation Record carve out copy size of function
 	sw $ra, ($a1)		# Store Return address 
 	sw $sp 4($a1)		# Store the old Stack pointer
 	move $sp, $a1		# Make SP the current activation record
@@ -73,20 +73,6 @@ main:			# function definition
 	la $a0, y		# EMIT Var global variable
 	addi $a1, $a0, 0		# Load location of variable into $a1
 	li $a0, 4		# expression is a constant
-	sw $a0 ($a1)		# store read in value to memory
-	la $a0, y		# EMIT Var global variable
-	lw $a0, ($a0)		# Expression is a VAR
-	li $v0, 1		# About to print a number
-	syscall		# call write number
-
-
-	la $a0, _L6		# The string address
-	li $v0, 4		# About to print a string
-	syscall		# call write string
-
-
-	lw $ra ($sp)		# restore old environment RA
-	lw $sp 4($sp)		# Return from function store SP
-
-	li $v0, 10		# Exit from Main
-	syscall		# EXIT everything
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 3		# expression is a constant
+	add $a0, $a1, $a2		# Perform addition
