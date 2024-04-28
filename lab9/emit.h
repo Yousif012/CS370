@@ -18,6 +18,8 @@ void emit_expr(ASTnode * p, FILE * fp);
 void emit_read(ASTnode * p, FILE * fp);
 void emit_var(ASTnode * p, FILE * fp);
 void emit_assign(ASTnode * p, FILE * fp);
+void emit_if(ASTnode * p, FILE * fp);
+void emit_ifBody(ASTnode * p, FILE * fp);
 
 
 

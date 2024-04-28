@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 int STRING_COUNT = 0; // global variable for count of strings
+int BRANCH_COUNT = 0; // global variable for count of branches (if and while statements)
+
 
 void EMIT(ASTnode * p, FILE * fp){
 
@@ -78,6 +80,10 @@ void EMIT_AST(ASTnode * p, FILE * fp){
             emit_assign(p, fp);
             EMIT_AST(p->next, fp);
             break;
+        case A_IF:
+            emit_if(p, fp);
+            EMIT_AST(p->next, fp);
+            break;
 
 
 
@@ -98,6 +104,16 @@ char * CreateLabel()
     STRING_COUNT++;
     return (s);
 }
+char * CreateBranchLabel()
+{
+    char hold[100];
+    char *s;
+    sprintf(hold,"_B%d",BRANCH_COUNT);
+    s=strdup(hold);
+    BRANCH_COUNT++;
+    return (s);
+}
+
 
 void emit_function(ASTnode * p, FILE * fp){
 
@@ -217,19 +233,117 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit_expr(p->s1, fp); // get first arg
                 emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "add $a0, $a1, $a2", "Perform addition");
-            default: printf("Operator %d is not implemented", p->type);
+                emit(fp, "", "add $a0, $a0, $a2", "Perform addition");
+                break;
+            case A_MINUS:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "sub $a0, $a2, $a0", "Perform subtraction");
+                break;
+            case A_MULT:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "mult $a0, $a2", "Perform subtraction");
+                emit(fp, "", "mflo $a0", "Store multiplication result in $a0");
+                break;
+            case A_DIV:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "div $a0, $a2", "Perform divison");
+                emit(fp, "", "mfhi $a0", "Store divison result in $a0");
+                break;
+            case A_UMINUS:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "li $a2, 0", "Load 0 into $a2");
+                emit(fp, "", "sub $a0, $a2, $a0", "Perform unary minus operation");
+                break;
+            case A_EE:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "seq $a0, $a0, $a2", "Compare $a0 and $a2 and store result in $a0");
+                break;
+            case A_NE:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "sne $a0, $a0, $a2", "Compare $a0 and $a2 and store result in $a0");
+                break;
+            case A_LT:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "slt $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                break;
+            case A_LET:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "sle $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                break;
+            case A_BT:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "sgt $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                break;
+            case A_BET:
+                emit_expr(p->s1, fp); // get first arg
+                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s2, fp);
+                emit(fp, "", "sge $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                break;
+            default: printf("Operator %d is not implemented", p->operator);
                      exit(1);
             }
 
-        }
+    }
 }
 
 void emit_assign(ASTnode * p, FILE * fp){
+    char s[100];
+
     emit_var(p->s1, fp); // $a0 will be the location of the variable
     emit(fp, "", "addi $a1, $a0, 0", "Load location of variable into $a1");
     emit_expr(p->s2, fp);
-    emit(fp, "", "sw $a0 $a1", "Assign new value to variable");
+    sprintf(s, "sw $a0, ($a1)");
+    emit(fp, "", s, "Assign new value to variable");
+    fprintf(fp, "\n\n");
+}
+
+void emit_if(ASTnode * p, FILE * fp){
+    char s[100];
+    
+    p->label = CreateBranchLabel();
+    p->s2->label = p->label;
+
+    emit_expr(p->s1, fp);
+
+    emit(fp, "", "li $a1, 1", "Load 1 into $a1");
+    sprintf(s, "beq $a0, $a1, %s", p->label);
+    emit(fp, "", s, "Start conditional statement");
+
+    emit_ifBody(p->s2, fp);
+
+    fprintf(fp, "\n\n");
+}
+
+void emit_ifBody(ASTnode * p, FILE * fp){
+    char s[100];
+
+    fprintf(fp, "\n\n\t# Enter else statement body\n");
+    EMIT_AST(p->s2, fp);
+    sprintf(s, "b %s%s", p->label, "_exit");
+    emit(fp, "", s, "Exit if statement");
+    fprintf(fp, "\n\n\t# Enter if statement body\n");
+    sprintf(s, "%s:", p->label);
+    emit(fp, "", s, "");
+    EMIT_AST(p->s1, fp);
+    sprintf(s, "%s%s:", p->label, "_exit");
+    emit(fp, "", s, "Continue program");
 }
 
 

@@ -12,9 +12,30 @@ int main(void)
    write "you entered: ";
    write y;
    write "\n";
-   y = 4+3;
-   write y;
-   write "\n";
+
+   if(y == 3){
+      write "y is 3\n";
+   }
+
+   if(y != 3){
+      write "y is not 3\n";
+   }
+
+   if(y < 3){
+      write "y is less than 3\n";
+   }
+
+   if(y <= 3){
+      write "y is less than or equal to 3\n";
+   }
+
+   if(y > 3){
+      write "y is bigger than 3\n";
+   }
+
+   if(y >= 3){
+      write "y is bigger than or equal to 3\n";
+   }
 
 
 }

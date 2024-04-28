@@ -507,11 +507,11 @@ static const yytype_uint16 yyrline[] =
        0,    75,    75,    78,    79,    86,    87,    90,   127,   128,
      131,   135,   140,   145,   154,   170,   153,   192,   193,   196,
      197,   201,   215,   232,   231,   249,   250,   257,   258,   265,
-     266,   267,   268,   269,   270,   271,   272,   275,   280,   284,
-     291,   301,   309,   311,   319,   326,   331,   339,   354,   380,
-     409,   412,   413,   432,   433,   434,   435,   436,   437,   441,
-     442,   462,   463,   465,   466,   486,   486,   488,   489,   495,
-     496,   497,   506,   540,   540,   542,   552
+     266,   267,   268,   269,   270,   271,   272,   275,   280,   283,
+     290,   300,   308,   310,   318,   325,   330,   338,   353,   379,
+     408,   411,   412,   431,   432,   433,   434,   435,   436,   440,
+     441,   461,   462,   464,   465,   485,   485,   487,   488,   494,
+     495,   496,   505,   539,   539,   541,   551
 };
 #endif
 
@@ -1809,7 +1809,7 @@ yyreduce:
     break;
 
   case 39:
-#line 285 "lab7.y"
+#line 284 "lab7.y"
     {
 				 (yyval.node) = ASTCreateNode(A_IF);
 				 (yyval.node)->s1 = (yyvsp[(3) - (5)].node);
@@ -1819,7 +1819,7 @@ yyreduce:
     break;
 
   case 40:
-#line 292 "lab7.y"
+#line 291 "lab7.y"
     {
 				 (yyval.node) = ASTCreateNode(A_IF);
 				 (yyval.node)->s1 = (yyvsp[(3) - (7)].node);
@@ -1830,7 +1830,7 @@ yyreduce:
     break;
 
   case 41:
-#line 302 "lab7.y"
+#line 301 "lab7.y"
     {
 				(yyval.node) = ASTCreateNode(A_WHILE);
 				(yyval.node)->s1 = (yyvsp[(3) - (5)].node);
@@ -1839,12 +1839,12 @@ yyreduce:
     break;
 
   case 42:
-#line 310 "lab7.y"
+#line 309 "lab7.y"
     { (yyval.node) = ASTCreateNode(A_RETURN); }
     break;
 
   case 43:
-#line 312 "lab7.y"
+#line 311 "lab7.y"
     { 
 				(yyval.node) = ASTCreateNode(A_RETURN); 
 				(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1852,7 +1852,7 @@ yyreduce:
     break;
 
   case 44:
-#line 320 "lab7.y"
+#line 319 "lab7.y"
     {
 			(yyval.node) = ASTCreateNode(A_READ);
 			(yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1860,7 +1860,7 @@ yyreduce:
     break;
 
   case 45:
-#line 327 "lab7.y"
+#line 326 "lab7.y"
     { 
 			 (yyval.node) = ASTCreateNode(A_WRITE);
 			 (yyval.node)->name = (yyvsp[(2) - (3)].string);
@@ -1868,7 +1868,7 @@ yyreduce:
     break;
 
   case 46:
-#line 332 "lab7.y"
+#line 331 "lab7.y"
     {
 			 (yyval.node) = ASTCreateNode(A_WRITE);
 			 (yyval.node)->s1 = (yyvsp[(2) - (3)].node);
@@ -1876,7 +1876,7 @@ yyreduce:
     break;
 
   case 47:
-#line 340 "lab7.y"
+#line 339 "lab7.y"
     {
 					if((yyvsp[(1) - (4)].node)->my_data_type != (yyvsp[(3) - (4)].node)->my_data_type){
 						yyerror("Type Mismatch");
@@ -1892,7 +1892,7 @@ yyreduce:
     break;
 
   case 48:
-#line 355 "lab7.y"
+#line 354 "lab7.y"
     { 
 		struct SymbTab *p;
 		p = Search((yyvsp[(1) - (1)].string), LEVEL, 1);
@@ -1921,7 +1921,7 @@ yyreduce:
     break;
 
   case 49:
-#line 381 "lab7.y"
+#line 380 "lab7.y"
     { 
 		struct SymbTab *p;
 		p = Search((yyvsp[(1) - (4)].string), LEVEL, 1);
@@ -1951,17 +1951,17 @@ yyreduce:
     break;
 
   case 50:
-#line 409 "lab7.y"
+#line 408 "lab7.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 51:
-#line 412 "lab7.y"
+#line 411 "lab7.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 52:
-#line 414 "lab7.y"
+#line 413 "lab7.y"
     {
 
 					// check if variables are same type
@@ -1982,42 +1982,42 @@ yyreduce:
     break;
 
   case 53:
-#line 432 "lab7.y"
+#line 431 "lab7.y"
     { (yyval.operator) = A_LET; }
     break;
 
   case 54:
-#line 433 "lab7.y"
+#line 432 "lab7.y"
     { (yyval.operator) = A_LT; }
     break;
 
   case 55:
-#line 434 "lab7.y"
+#line 433 "lab7.y"
     { (yyval.operator) = A_BT; }
     break;
 
   case 56:
-#line 435 "lab7.y"
+#line 434 "lab7.y"
     { (yyval.operator) = A_BET; }
     break;
 
   case 57:
-#line 436 "lab7.y"
+#line 435 "lab7.y"
     { (yyval.operator) = A_EE; }
     break;
 
   case 58:
-#line 437 "lab7.y"
+#line 436 "lab7.y"
     { (yyval.operator) = A_NE; }
     break;
 
   case 59:
-#line 441 "lab7.y"
+#line 440 "lab7.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 60:
-#line 443 "lab7.y"
+#line 442 "lab7.y"
     {
 
 					 // check if variables are same type
@@ -2038,22 +2038,22 @@ yyreduce:
     break;
 
   case 61:
-#line 462 "lab7.y"
+#line 461 "lab7.y"
     { (yyval.operator) = A_PLUS; }
     break;
 
   case 62:
-#line 463 "lab7.y"
+#line 462 "lab7.y"
     { (yyval.operator) = A_MINUS; }
     break;
 
   case 63:
-#line 465 "lab7.y"
+#line 464 "lab7.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 64:
-#line 467 "lab7.y"
+#line 466 "lab7.y"
     { 
 
 		// check if variables are same type
@@ -2074,22 +2074,22 @@ yyreduce:
     break;
 
   case 65:
-#line 486 "lab7.y"
+#line 485 "lab7.y"
     { (yyval.operator) = A_MULT; }
     break;
 
   case 66:
-#line 486 "lab7.y"
+#line 485 "lab7.y"
     { (yyval.operator) = A_DIV; }
     break;
 
   case 67:
-#line 488 "lab7.y"
+#line 487 "lab7.y"
     { (yyval.node) = (yyvsp[(2) - (3)].node); }
     break;
 
   case 68:
-#line 490 "lab7.y"
+#line 489 "lab7.y"
     { 
 		 (yyval.node) = ASTCreateNode(A_NUM);
 	   	 (yyval.node)->value = (yyvsp[(1) - (1)].value); 
@@ -2098,17 +2098,17 @@ yyreduce:
     break;
 
   case 69:
-#line 495 "lab7.y"
+#line 494 "lab7.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 70:
-#line 496 "lab7.y"
+#line 495 "lab7.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 71:
-#line 498 "lab7.y"
+#line 497 "lab7.y"
     { 
 		(yyval.node) = ASTCreateNode(A_EXPR);
 		(yyval.node)->operator = A_UMINUS;
@@ -2118,7 +2118,7 @@ yyreduce:
     break;
 
   case 72:
-#line 507 "lab7.y"
+#line 506 "lab7.y"
     { 
 		struct SymbTab *p;
 		p = Search((yyvsp[(1) - (4)].string), 0, 0);
@@ -2153,17 +2153,17 @@ yyreduce:
     break;
 
   case 73:
-#line 540 "lab7.y"
+#line 539 "lab7.y"
     { (yyval.node) = (yyvsp[(1) - (1)].node); }
     break;
 
   case 74:
-#line 540 "lab7.y"
+#line 539 "lab7.y"
     { (yyval.node) = NULL; }
     break;
 
   case 75:
-#line 543 "lab7.y"
+#line 542 "lab7.y"
     { 
 			(yyval.node) = ASTCreateNode(A_ARG);
 			(yyval.node)->s1 = (yyvsp[(1) - (1)].node);
@@ -2176,7 +2176,7 @@ yyreduce:
     break;
 
   case 76:
-#line 553 "lab7.y"
+#line 552 "lab7.y"
     { 
 			(yyval.node) = ASTCreateNode(A_ARG);
 			(yyval.node)->s1 = (yyvsp[(1) - (3)].node);
@@ -2405,7 +2405,7 @@ yyreturn:
 }
 
 
-#line 565 "lab7.y"
+#line 564 "lab7.y"
 	/* end of rules, start of program */
 
 int main(int argc, char *argv[])

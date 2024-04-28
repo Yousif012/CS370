@@ -280,7 +280,6 @@ Expression_Stmt : Expression ';'
 				| ';' { $$ = ASTCreateNode(A_EXPR_STMT); }
 				;
 
-/* We will create another node A_IFBODY to handle the contents of the ELSE statement if it exists */
 Selection_Stmt : T_IF '(' Expression ')' Statement
 				{
 				 $$ = ASTCreateNode(A_IF);

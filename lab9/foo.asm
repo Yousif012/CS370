@@ -8,7 +8,12 @@ _L2: .asciiz "\n"
 _L3: .asciiz "enter a number "
 _L4: .asciiz "you entered: "
 _L5: .asciiz "\n"
-_L6: .asciiz "\n"
+_L6: .asciiz "y is bigger than or equal to 3\n"
+_L7: .asciiz "y is bigger than 3\n"
+_L8: .asciiz "y is less than or equal to 3\n"
+_L9: .asciiz "y is less than 3\n"
+_L10: .asciiz "y is not 3\n"
+_L11: .asciiz "y is 3\n"
 .align 2
 y: .space 4
 Z: .space 400
@@ -17,7 +22,7 @@ Z: .space 400
 
 main:			# function definition
 	move $a1, $sp		# Activation Record carve out copy SP
-	subi $a1, $a1, 16		# Activation Record carve out copy size of function
+	subi $a1, $a1, 32		# Activation Record carve out copy size of function
 	sw $ra, ($a1)		# Store Return address 
 	sw $sp 4($a1)		# Store the old Stack pointer
 	move $sp, $a1		# Make SP the current activation record
@@ -71,8 +76,145 @@ main:			# function definition
 
 
 	la $a0, y		# EMIT Var global variable
-	addi $a1, $a0, 0		# Load location of variable into $a1
-	li $a0, 4		# expression is a constant
+	lw $a0, ($a0)		# Expression is a VAR
 	addi $a2, $a0, 0		# Load location of variable into $a1
 	li $a0, 3		# expression is a constant
-	add $a0, $a1, $a2		# Perform addition
+	seq $a0, $a0, $a2		# Compare $a0 and $a2 and store result in $a0
+	li $a1, 1		# Load 1 into $a1
+	beq $a0, $a1, _B0		# Start conditional statement
+
+
+	# Enter else statement body
+	b _B0_exit		# Exit if statement
+
+
+	# Enter if statement body
+	_B0:		
+	la $a0, _L11		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	_B0_exit:		# Continue program
+
+
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 3		# expression is a constant
+	sne $a0, $a0, $a2		# Compare $a0 and $a2 and store result in $a0
+	li $a1, 1		# Load 1 into $a1
+	beq $a0, $a1, _B1		# Start conditional statement
+
+
+	# Enter else statement body
+	b _B1_exit		# Exit if statement
+
+
+	# Enter if statement body
+	_B1:		
+	la $a0, _L10		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	_B1_exit:		# Continue program
+
+
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 3		# expression is a constant
+	slt $a0, $a2, $a0		# Compare $a0 and $a2 and store result in $a0
+	li $a1, 1		# Load 1 into $a1
+	beq $a0, $a1, _B2		# Start conditional statement
+
+
+	# Enter else statement body
+	b _B2_exit		# Exit if statement
+
+
+	# Enter if statement body
+	_B2:		
+	la $a0, _L9		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	_B2_exit:		# Continue program
+
+
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 3		# expression is a constant
+	sle $a0, $a2, $a0		# Compare $a0 and $a2 and store result in $a0
+	li $a1, 1		# Load 1 into $a1
+	beq $a0, $a1, _B3		# Start conditional statement
+
+
+	# Enter else statement body
+	b _B3_exit		# Exit if statement
+
+
+	# Enter if statement body
+	_B3:		
+	la $a0, _L8		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	_B3_exit:		# Continue program
+
+
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 3		# expression is a constant
+	sgt $a0, $a2, $a0		# Compare $a0 and $a2 and store result in $a0
+	li $a1, 1		# Load 1 into $a1
+	beq $a0, $a1, _B4		# Start conditional statement
+
+
+	# Enter else statement body
+	b _B4_exit		# Exit if statement
+
+
+	# Enter if statement body
+	_B4:		
+	la $a0, _L7		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	_B4_exit:		# Continue program
+
+
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 3		# expression is a constant
+	sge $a0, $a2, $a0		# Compare $a0 and $a2 and store result in $a0
+	li $a1, 1		# Load 1 into $a1
+	beq $a0, $a1, _B5		# Start conditional statement
+
+
+	# Enter else statement body
+	b _B5_exit		# Exit if statement
+
+
+	# Enter if statement body
+	_B5:		
+	la $a0, _L6		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	_B5_exit:		# Continue program
+
+
+	lw $ra ($sp)		# restore old environment RA
+	lw $sp 4($sp)		# Return from function store SP
+
+	li $v0, 10		# Exit from Main
+	syscall		# EXIT everything
