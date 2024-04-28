@@ -74,6 +74,10 @@ void EMIT_AST(ASTnode * p, FILE * fp){
             emit_read(p, fp);
             EMIT_AST(p->next, fp);
             break;
+        case A_ASSIGN:
+            emit_assign(p, fp);
+            EMIT_AST(p->next, fp);
+            break;
 
 
 
@@ -202,6 +206,13 @@ void emit_expr(ASTnode * p, FILE * fp){
                  printf("FIX FIX FIX\n");
                  exit(1);
     }
+}
+
+void emit_assign(ASTnode * p, FILE * fp){
+    emit_var(p->s1, fp); // $a0 will be the location of the variable
+    emit(fp, "", "addi $a1, $a0, 0", "Load location of variable into $a1");
+    emit_expr(p->s2, fp);
+    emit(fp, "", "sw $a0 ($a1)", "Assign new value to variable");
 }
 
 

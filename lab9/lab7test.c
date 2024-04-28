@@ -12,6 +12,9 @@ int main(void)
    write "you entered: ";
    write y;
    write "\n";
+   y = 4;
+   write y;
+   write "\n";
 
 
 }
