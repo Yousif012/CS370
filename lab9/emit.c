@@ -84,6 +84,10 @@ void EMIT_AST(ASTnode * p, FILE * fp){
             emit_if(p, fp);
             EMIT_AST(p->next, fp);
             break;
+        case A_WHILE:
+            emit_while(p, fp);
+            EMIT_AST(p->next, fp);
+            break;
 
 
 
@@ -224,9 +228,8 @@ void emit_expr(ASTnode * p, FILE * fp){
     }
     
         
-    // handlee mathematical/logical expressions
+    // handle mathematical/conditional expressions
     // result will be in $a0
-    // NEEDS WORK
     if (p->type == A_EXPR){
         switch(p->operator){
             case A_PLUS:
@@ -261,37 +264,43 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", "sub $a0, $a2, $a0", "Perform unary minus operation");
                 break;
             case A_EE:
-                emit_expr(p->s1, fp); // get first arg
+                // $a0 == $a2
+                emit_expr(p->s1, fp); 
                 emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
                 emit_expr(p->s2, fp);
                 emit(fp, "", "seq $a0, $a0, $a2", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_NE:
-                emit_expr(p->s1, fp); // get first arg
+                // $a0 != $a2
+                emit_expr(p->s1, fp); 
                 emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
                 emit_expr(p->s2, fp);
                 emit(fp, "", "sne $a0, $a0, $a2", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_LT:
-                emit_expr(p->s1, fp); // get first arg
+                // $a2 < $a0
+                emit_expr(p->s1, fp); 
                 emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
                 emit_expr(p->s2, fp);
                 emit(fp, "", "slt $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_LET:
-                emit_expr(p->s1, fp); // get first arg
+                // $a2 <= $a0
+                emit_expr(p->s1, fp); 
                 emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
                 emit_expr(p->s2, fp);
                 emit(fp, "", "sle $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_BT:
-                emit_expr(p->s1, fp); // get first arg
+                // $a2 > $a0
+                emit_expr(p->s1, fp); 
                 emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
                 emit_expr(p->s2, fp);
                 emit(fp, "", "sgt $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_BET:
-                emit_expr(p->s1, fp); // get first arg
+                // $a2 >= $a0
+                emit_expr(p->s1, fp); 
                 emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
                 emit_expr(p->s2, fp);
                 emit(fp, "", "sge $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
@@ -346,6 +355,35 @@ void emit_ifBody(ASTnode * p, FILE * fp){
     emit(fp, "", s, "Continue program");
 }
 
+void emit_while(ASTnode * p, FILE * fp){
+    char s[100];
+    
+    p->label = CreateBranchLabel();
+    p->s2->label = p->label;
+
+    fprintf(fp, "\n\n\t# Enter while statement condition\n");
+
+    sprintf(s, "%s:", p->label);
+    emit(fp, "", s, "");
+
+    emit_expr(p->s1, fp);
+
+    emit(fp, "", "li $a1, 1", "Load 1 into $a1");
+    sprintf(s, "bne $a0, $a1, %s%s", p->label, "_exit");
+    emit(fp, "", s, "");
+
+    fprintf(fp, "\n\n\t# Enter while statement body\n");
+
+    EMIT_AST(p->s2, fp);
+
+    sprintf(s, "b %s", p->label);
+    emit(fp, "", s, "continue while statement");
+
+    sprintf(s, "%s%s:", p->label, "_exit");
+    emit(fp, "", s, "Continue program");
+
+    fprintf(fp, "\n\n");
+}
 
 
 void emit(FILE *fp, char * label, char * command, char * comment)

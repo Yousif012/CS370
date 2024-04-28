@@ -8,12 +8,13 @@ _L2: .asciiz "\n"
 _L3: .asciiz "enter a number "
 _L4: .asciiz "you entered: "
 _L5: .asciiz "\n"
-_L6: .asciiz "y is bigger than or equal to 3\n"
-_L7: .asciiz "y is bigger than 3\n"
-_L8: .asciiz "y is less than or equal to 3\n"
-_L9: .asciiz "y is less than 3\n"
-_L10: .asciiz "y is not 3\n"
-_L11: .asciiz "y is 3\n"
+_L6: .asciiz "\n"
+_L7: .asciiz "y is bigger than or equal to 3\n"
+_L8: .asciiz "y is bigger than 3\n"
+_L9: .asciiz "y is less than or equal to 3\n"
+_L10: .asciiz "y is less than 3\n"
+_L11: .asciiz "y is not 3\n"
+_L12: .asciiz "y is 3\n"
 .align 2
 y: .space 4
 Z: .space 400
@@ -22,7 +23,7 @@ Z: .space 400
 
 main:			# function definition
 	move $a1, $sp		# Activation Record carve out copy SP
-	subi $a1, $a1, 32		# Activation Record carve out copy size of function
+	subi $a1, $a1, 44		# Activation Record carve out copy size of function
 	sw $ra, ($a1)		# Store Return address 
 	sw $sp 4($a1)		# Store the old Stack pointer
 	move $sp, $a1		# Make SP the current activation record
@@ -90,7 +91,7 @@ main:			# function definition
 
 	# Enter if statement body
 	_B0:		
-	la $a0, _L11		# The string address
+	la $a0, _L12		# The string address
 	li $v0, 4		# About to print a string
 	syscall		# call write string
 
@@ -113,7 +114,7 @@ main:			# function definition
 
 	# Enter if statement body
 	_B1:		
-	la $a0, _L10		# The string address
+	la $a0, _L11		# The string address
 	li $v0, 4		# About to print a string
 	syscall		# call write string
 
@@ -136,7 +137,7 @@ main:			# function definition
 
 	# Enter if statement body
 	_B2:		
-	la $a0, _L9		# The string address
+	la $a0, _L10		# The string address
 	li $v0, 4		# About to print a string
 	syscall		# call write string
 
@@ -159,7 +160,7 @@ main:			# function definition
 
 	# Enter if statement body
 	_B3:		
-	la $a0, _L8		# The string address
+	la $a0, _L9		# The string address
 	li $v0, 4		# About to print a string
 	syscall		# call write string
 
@@ -182,7 +183,7 @@ main:			# function definition
 
 	# Enter if statement body
 	_B4:		
-	la $a0, _L7		# The string address
+	la $a0, _L8		# The string address
 	li $v0, 4		# About to print a string
 	syscall		# call write string
 
@@ -205,12 +206,51 @@ main:			# function definition
 
 	# Enter if statement body
 	_B5:		
-	la $a0, _L6		# The string address
+	la $a0, _L7		# The string address
 	li $v0, 4		# About to print a string
 	syscall		# call write string
 
 
 	_B5_exit:		# Continue program
+
+
+
+
+	# Enter while statement condition
+	_B6:		
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 0		# expression is a constant
+	sgt $a0, $a2, $a0		# Compare $a0 and $a2 and store result in $a0
+	li $a1, 1		# Load 1 into $a1
+	bne $a0, $a1, _B6_exit		
+
+
+	# Enter while statement body
+	la $a0, y		# EMIT Var global variable
+	addi $a1, $a0, 0		# Load location of variable into $a1
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	addi $a2, $a0, 0		# Load location of variable into $a1
+	li $a0, 1		# expression is a constant
+	sub $a0, $a2, $a0		# Perform subtraction
+	sw $a0, ($a1)		# Assign new value to variable
+
+
+	la $a0, y		# EMIT Var global variable
+	lw $a0, ($a0)		# Expression is a VAR
+	li $v0, 1		# About to print a number
+	syscall		# call write number
+
+
+	la $a0, _L6		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	b _B6		# continue while statement
+	_B6_exit:		# Continue program
 
 
 	lw $ra ($sp)		# restore old environment RA

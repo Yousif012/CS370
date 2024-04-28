@@ -37,5 +37,11 @@ int main(void)
       write "y is bigger than or equal to 3\n";
    }
 
+   while (y > 0){
+      y = y - 1;
+      write y;
+      write "\n";
+   }
+
 
 }

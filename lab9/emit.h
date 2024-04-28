@@ -20,6 +20,7 @@ void emit_var(ASTnode * p, FILE * fp);
 void emit_assign(ASTnode * p, FILE * fp);
 void emit_if(ASTnode * p, FILE * fp);
 void emit_ifBody(ASTnode * p, FILE * fp);
+void emit_while(ASTnode * p, FILE * fp);
 
 
 
