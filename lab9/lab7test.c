@@ -1,47 +1,26 @@
-int y,Z[100];
+// reads in 5 values 
+// into an array and prints squaer out
 
 
-int main(void)
-{
-   write  "hello\n";
-   write  "world\n";
-   write 123;
-   write "\n";
-   write "enter a number ";
-   read y;
-   write "you entered: ";
-   write y;
-   write "\n";
-
-   if(y == 3){
-      write "y is 3\n";
+  int x[5];
+void main(void) {
+  int i;
+   i=0;
+  while (i < 5) 
+   {
+      write "enter X ";
+      read x[i];
+      i = i + 1;
    }
+ 
+   i=0;
 
-   if(y != 3){
-      write "y is not 3\n";
-   }
-
-   if(y < 3){
-      write "y is less than 3\n";
-   }
-
-   if(y <= 3){
-      write "y is less than or equal to 3\n";
-   }
-
-   if(y > 3){
-      write "y is bigger than 3\n";
-   }
-
-   if(y >= 3){
-      write "y is bigger than or equal to 3\n";
-   }
-
-   while (y > 0){
-      y = y - 1;
-      write y;
+  while (i < 5)
+   {
+      write x[i] * x[i];
       write "\n";
+      i = i + 1;
+      
    }
-
 
 }

@@ -65,6 +65,7 @@ void EMIT_AST(ASTnode * p, FILE * fp){
             EMIT_AST(p->next, fp);
             break;
         case A_COMPOUND:
+            EMIT_AST(p->s1, fp);
             EMIT_AST(p->s2, fp);
             EMIT_AST(p->next, fp);
             break;
@@ -86,6 +87,10 @@ void EMIT_AST(ASTnode * p, FILE * fp){
             break;
         case A_WHILE:
             emit_while(p, fp);
+            EMIT_AST(p->next, fp);
+            break;
+        case A_PARAM:
+            emit_param(p, fp);
             EMIT_AST(p->next, fp);
             break;
 
@@ -136,6 +141,7 @@ void emit_function(ASTnode * p, FILE * fp){
     fprintf(fp, "\n\n");
 
     // copy the parameters to the formal from registers $t0 et
+    EMIT_AST(p->s1, fp);
 
     // generate compound statement
     EMIT_AST(p->s2, fp);
@@ -156,6 +162,10 @@ void emit_function(ASTnode * p, FILE * fp){
     else{
         // jump back to the caller
     }
+}
+
+void emit_param(ASTnode * p, FILE * fp){
+
 }
 
 void emit_write(ASTnode * p, FILE * fp){
@@ -189,19 +199,50 @@ void emit_read(ASTnode * p, FILE * fp){
 
 void emit_var(ASTnode * p, FILE * fp){
     char s[100];
+    
+    printf("%s: %d\n", p->name, p->symbol->offset);
+
+
     // handle internal offset if array
 
     if(p->symbol->level == 0) // global variable
     {
+
+        if(p->symbol->SubType == SYM_ARRAY){
+            emit_expr(p->s1, fp);
+            emit(fp, "", "move $a1, $a0", "VAR copy index array in a1");
+            sprintf(s, "sll $a1, $a1 %d", LOG_W_SIZE);
+            emit(fp, "", s, "muliply the index by wordszie via SLL");
+        }
         // get the direct address of global var
         sprintf(s, "la $a0, %s", p->name);
         emit(fp, "", s, "EMIT Var global variable");
+
     }
     else{
+
+        
+        if(p->symbol->SubType == SYM_ARRAY) { // p is an array     
+            emit(fp, "", "move $a1, $a0", "VAR copy index array in a1");
+            sprintf(s, "sll $a1, $a1 %d", LOG_W_SIZE);
+            emit(fp, "", s, "muliply the index by wordszie via SLL");
+            emit(fp, "", "move $a0, $sp", "VAR copy index array in a1");
+            sprintf(s, "addi $a0, $a0, %d", p->symbol->offset*W_SIZE);
+            emit(fp, "", s, "VAR local stack pointer plus offset");
+
+        }
         // local variable, Stack pointer plus offset
+        else { // p is not an array
+            emit(fp, "", "move $a0, $sp", "VAR local make a copy of stackpointer");
+            sprintf(s, "addi $a0, $a0, %d", p->symbol->offset*W_SIZE);
+            emit(fp, "", s, "VAR local stack pointer plus offset");
+        }
     }
 
     // add on array index if needed
+    if(p->symbol->SubType == SYM_ARRAY){
+        emit(fp, "", "add $a0, $a0, $a1", "VAR array add internal offset");
+    }
 }
 
 
@@ -233,77 +274,117 @@ void emit_expr(ASTnode * p, FILE * fp){
     if (p->type == A_EXPR){
         switch(p->operator){
             case A_PLUS:
-                emit_expr(p->s1, fp); // get first arg
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "add $a0, $a0, $a2", "Perform addition");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "add $a0, $a0, $a1", "EXPR ADD");
                 break;
             case A_MINUS:
-                emit_expr(p->s1, fp); // get first arg
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "sub $a0, $a2, $a0", "Perform subtraction");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "sub $a0, $a2, $a0", "EXPR SUB");
                 break;
             case A_MULT:
-                emit_expr(p->s1, fp); // get first arg
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "mult $a0, $a2", "Perform subtraction");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "mult $a1, $a0", "EXPR MULT");
                 emit(fp, "", "mflo $a0", "Store multiplication result in $a0");
                 break;
             case A_DIV:
-                emit_expr(p->s1, fp); // get first arg
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "div $a0, $a2", "Perform divison");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "div $a0, $a2", "EXPR DIV");
                 emit(fp, "", "mfhi $a0", "Store divison result in $a0");
                 break;
             case A_UMINUS:
                 emit_expr(p->s1, fp); // get first arg
                 emit(fp, "", "li $a2, 0", "Load 0 into $a2");
-                emit(fp, "", "sub $a0, $a2, $a0", "Perform unary minus operation");
+                emit(fp, "", "sub $a0, $a2, $a0", "EXPR UMINUS");
                 break;
             case A_EE:
                 // $a0 == $a2
-                emit_expr(p->s1, fp); 
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "seq $a0, $a0, $a2", "Compare $a0 and $a2 and store result in $a0");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "seq $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_NE:
                 // $a0 != $a2
-                emit_expr(p->s1, fp); 
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "sne $a0, $a0, $a2", "Compare $a0 and $a2 and store result in $a0");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "sne $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_LT:
                 // $a2 < $a0
-                emit_expr(p->s1, fp); 
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "slt $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "slt $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_LET:
                 // $a2 <= $a0
-                emit_expr(p->s1, fp); 
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "sle $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "sle $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_BT:
                 // $a2 > $a0
-                emit_expr(p->s1, fp); 
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "sgt $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "sgt $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
             case A_BET:
                 // $a2 >= $a0
-                emit_expr(p->s1, fp); 
-                emit(fp, "", "addi $a2, $a0, 0", "Load location of variable into $a1");
+                emit_expr(p->s1, fp);
+                sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression store LHS temporarily");
                 emit_expr(p->s2, fp);
-                emit(fp, "", "sge $a0, $a2, $a0", "Compare $a0 and $a2 and store result in $a0");
+                emit(fp, "", "move $a1, $a0", "right hand side needs to be a1");
+                sprintf(s, "lw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+                emit(fp, "", s, "expression restore LHS from memory");
+                emit(fp, "", "sge $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
             default: printf("Operator %d is not implemented", p->operator);
                      exit(1);
@@ -315,11 +396,15 @@ void emit_expr(ASTnode * p, FILE * fp){
 void emit_assign(ASTnode * p, FILE * fp){
     char s[100];
 
-    emit_var(p->s1, fp); // $a0 will be the location of the variable
-    emit(fp, "", "addi $a1, $a0, 0", "Load location of variable into $a1");
     emit_expr(p->s2, fp);
-    sprintf(s, "sw $a0, ($a1)");
-    emit(fp, "", s, "Assign new value to variable");
+    sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
+    emit(fp, "", s, "Assign store RHS temporarily");
+    emit(fp, "", "move $a0, $sp", "VAR local make a copy of stackpointer");
+    sprintf(s, "addi $a0, $a0, %d", p->s1->symbol->offset*W_SIZE);
+    emit(fp, "", s, "VAR local stack pointer plus offset");
+    sprintf(s, "lw $a1, %d($sp)", p->symbol->offset*W_SIZE);
+    emit(fp, "", s, "Assign get RHS temporarily");
+    emit(fp, "", "sw $a1, ($a0)", "Assign new value to variable");
     fprintf(fp, "\n\n");
 }
 
