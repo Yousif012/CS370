@@ -1,26 +1,25 @@
-// reads in 5 values 
-// into an array and prints squaer out
+// Simple program to test while loops and arrays
 
 
-  int x[5];
-void main(void) {
-  int i;
-   i=0;
-  while (i < 5) 
-   {
-      write "enter X ";
-      read x[i];
-      i = i + 1;
-   }
- 
-   i=0;
+void main(void){
+    int i;
+    int A[20];
 
-  while (i < 5)
-   {
-      write x[i] * x[i];
-      write "\n";
-      i = i + 1;
-      
-   }
+     i = 0 ;
+    while (i< 19)
+    {  A[i] = i + 1;
+       i = i + 1;
+    }
+    A[19] = 0;
+
+    write "The following should be 13\n";
+    write A[A[A[10]]];
+    write "\n";
+    write "The following should be 3\n";
+    write A[A[A[A[10 + 9]]]];
+    write "\n";
+
+
+
 
 }

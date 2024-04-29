@@ -2,26 +2,27 @@
 
 .data
 
-_L0: .asciiz "\n"
-_L1: .asciiz "enter X "
+_L0: .asciiz "The following should be 13\n"
+_L1: .asciiz "\n"
+_L2: .asciiz "The following should be 3\n"
+_L3: .asciiz "\n"
 .align 2
-x: .space 20
 .text
 
 
 main:			# function definition
 	move $a1, $sp		# Activation Record carve out copy SP
-	subi $a1, $a1, 40		# Activation Record carve out copy size of function
+	subi $a1, $a1, 116		# Activation Record carve out copy size of function
 	sw $ra, ($a1)		# Store Return address 
 	sw $sp 4($a1)		# Store the old Stack pointer
 	move $sp, $a1		# Make SP the current activation record
 
 
 	li $a0, 0		# expression is a constant
-	sw $a0, 12($sp)		# Assign store RHS temporarily
+	sw $a0, 92($sp)		# Assign store RHS temporarily
 	move $a0, $sp		# VAR local make a copy of stackpointer
 	addi $a0, $a0, 8		# VAR local stack pointer plus offset
-	lw $a1, 12($sp)		# Assign get RHS temporarily
+	lw $a1, 92($sp)		# Assign get RHS temporarily
 	sw $a1, ($a0)		# Assign new value to variable
 
 
@@ -32,45 +33,48 @@ main:			# function definition
 	move $a0, $sp		# VAR local make a copy of stackpointer
 	addi $a0, $a0, 8		# VAR local stack pointer plus offset
 	lw $a0, ($a0)		# Expression is a VAR
-	sw $a0, 16($sp)		# expression store LHS temporarily
-	li $a0, 5		# expression is a constant
+	sw $a0, 96($sp)		# expression store LHS temporarily
+	li $a0, 19		# expression is a constant
 	move $a1, $a0		# right hand side needs to be a1
-	lw $a0, 16($sp)		# expression restore LHS from memory
+	lw $a0, 96($sp)		# expression restore LHS from memory
 	slt $a0, $a0, $a1		# Compare $a0 and $a2 and store result in $a0
-	li $a1, 1		# Load 1 into $a1
-	bne $a0, $a1, _B0_exit		
+	beq $a0, $0, _B0_exit		
 
 
 	# Enter while statement body
-	la $a0, _L1		# The string address
-	li $v0, 4		# About to print a string
-	syscall		# call write string
-
-
+	move $a0, $sp		# VAR local make a copy of stackpointer
+	addi $a0, $a0, 8		# VAR local stack pointer plus offset
+	lw $a0, ($a0)		# Expression is a VAR
+	sw $a0, 100($sp)		# expression store LHS temporarily
+	li $a0, 1		# expression is a constant
+	move $a1, $a0		# right hand side needs to be a1
+	lw $a0, 100($sp)		# expression restore LHS from memory
+	add $a0, $a0, $a1		# EXPR ADD
+	sw $a0, 104($sp)		# Assign store RHS temporarily
 	move $a0, $sp		# VAR local make a copy of stackpointer
 	addi $a0, $a0, 8		# VAR local stack pointer plus offset
 	lw $a0, ($a0)		# Expression is a VAR
 	move $a1, $a0		# VAR copy index array in a1
 	sll $a1, $a1 2		# muliply the index by wordszie via SLL
-	la $a0, x		# EMIT Var global variable
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
 	add $a0, $a0, $a1		# VAR array add internal offset
-	li $v0, 5		# About to read a value
-	syscall		# read in value $v0 now has the read value
-	sw $v0 ($a0)		# store read in value to memory
+	lw $a1, 104($sp)		# Assign get RHS temporarily
+	sw $a1, ($a0)		# Assign new value to variable
 
 
 	move $a0, $sp		# VAR local make a copy of stackpointer
 	addi $a0, $a0, 8		# VAR local stack pointer plus offset
 	lw $a0, ($a0)		# Expression is a VAR
-	sw $a0, 20($sp)		# expression store LHS temporarily
+	sw $a0, 108($sp)		# expression store LHS temporarily
 	li $a0, 1		# expression is a constant
 	move $a1, $a0		# right hand side needs to be a1
-	lw $a0, 20($sp)		# expression restore LHS from memory
+	lw $a0, 108($sp)		# expression restore LHS from memory
 	add $a0, $a0, $a1		# EXPR ADD
-	sw $a0, 24($sp)		# Assign store RHS temporarily
+	sw $a0, 112($sp)		# Assign store RHS temporarily
 	move $a0, $sp		# VAR local make a copy of stackpointer
 	addi $a0, $a0, 8		# VAR local stack pointer plus offset
-	lw $a1, 24($sp)		# Assign get RHS temporarily
+	lw $a1, 112($sp)		# Assign get RHS temporarily
 	sw $a1, ($a0)		# Assign new value to variable
 
 
@@ -79,53 +83,15 @@ main:			# function definition
 
 
 	li $a0, 0		# expression is a constant
-	sw $a0, 20($sp)		# Assign store RHS temporarily
-	move $a0, $sp		# VAR local make a copy of stackpointer
-	addi $a0, $a0, 8		# VAR local stack pointer plus offset
-	lw $a1, 20($sp)		# Assign get RHS temporarily
+	sw $a0, 100($sp)		# Assign store RHS temporarily
+	li $a0, 19		# expression is a constant
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
+	lw $a1, 100($sp)		# Assign get RHS temporarily
 	sw $a1, ($a0)		# Assign new value to variable
-
-
-
-
-	# Enter while statement condition
-	_B1:		
-	move $a0, $sp		# VAR local make a copy of stackpointer
-	addi $a0, $a0, 8		# VAR local stack pointer plus offset
-	lw $a0, ($a0)		# Expression is a VAR
-	sw $a0, 24($sp)		# expression store LHS temporarily
-	li $a0, 5		# expression is a constant
-	move $a1, $a0		# right hand side needs to be a1
-	lw $a0, 24($sp)		# expression restore LHS from memory
-	slt $a0, $a0, $a1		# Compare $a0 and $a2 and store result in $a0
-	li $a1, 1		# Load 1 into $a1
-	bne $a0, $a1, _B1_exit		
-
-
-	# Enter while statement body
-	move $a0, $sp		# VAR local make a copy of stackpointer
-	addi $a0, $a0, 8		# VAR local stack pointer plus offset
-	lw $a0, ($a0)		# Expression is a VAR
-	move $a1, $a0		# VAR copy index array in a1
-	sll $a1, $a1 2		# muliply the index by wordszie via SLL
-	la $a0, x		# EMIT Var global variable
-	add $a0, $a0, $a1		# VAR array add internal offset
-	lw $a0, ($a0)		# Expression is a VAR
-	sw $a0, 28($sp)		# expression store LHS temporarily
-	move $a0, $sp		# VAR local make a copy of stackpointer
-	addi $a0, $a0, 8		# VAR local stack pointer plus offset
-	lw $a0, ($a0)		# Expression is a VAR
-	move $a1, $a0		# VAR copy index array in a1
-	sll $a1, $a1 2		# muliply the index by wordszie via SLL
-	la $a0, x		# EMIT Var global variable
-	add $a0, $a0, $a1		# VAR array add internal offset
-	lw $a0, ($a0)		# Expression is a VAR
-	move $a1, $a0		# right hand side needs to be a1
-	lw $a0, 28($sp)		# expression restore LHS from memory
-	mult $a1, $a0		# EXPR MULT
-	mflo $a0		# Store multiplication result in $a0
-	li $v0, 1		# About to print a number
-	syscall		# call write number
 
 
 	la $a0, _L0		# The string address
@@ -133,23 +99,76 @@ main:			# function definition
 	syscall		# call write string
 
 
-	move $a0, $sp		# VAR local make a copy of stackpointer
-	addi $a0, $a0, 8		# VAR local stack pointer plus offset
+	li $a0, 10		# expression is a constant
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
 	lw $a0, ($a0)		# Expression is a VAR
-	sw $a0, 32($sp)		# expression store LHS temporarily
-	li $a0, 1		# expression is a constant
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
+	lw $a0, ($a0)		# Expression is a VAR
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
+	lw $a0, ($a0)		# Expression is a VAR
+	li $v0, 1		# About to print a number
+	syscall		# call write number
+
+
+	la $a0, _L1		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	la $a0, _L2		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
+
+
+	li $a0, 10		# expression is a constant
+	sw $a0, 104($sp)		# expression store LHS temporarily
+	li $a0, 9		# expression is a constant
 	move $a1, $a0		# right hand side needs to be a1
-	lw $a0, 32($sp)		# expression restore LHS from memory
+	lw $a0, 104($sp)		# expression restore LHS from memory
 	add $a0, $a0, $a1		# EXPR ADD
-	sw $a0, 36($sp)		# Assign store RHS temporarily
-	move $a0, $sp		# VAR local make a copy of stackpointer
-	addi $a0, $a0, 8		# VAR local stack pointer plus offset
-	lw $a1, 36($sp)		# Assign get RHS temporarily
-	sw $a1, ($a0)		# Assign new value to variable
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
+	lw $a0, ($a0)		# Expression is a VAR
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
+	lw $a0, ($a0)		# Expression is a VAR
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
+	lw $a0, ($a0)		# Expression is a VAR
+	move $a1, $a0		# VAR copy index array in a1
+	sll $a1, $a1 2		# muliply the index by wordszie via SLL
+	move $a0, $sp		# VAR copy index array in a1
+	addi $a0, $a0, 12		# VAR local stack pointer plus offset
+	add $a0, $a0, $a1		# VAR array add internal offset
+	lw $a0, ($a0)		# Expression is a VAR
+	li $v0, 1		# About to print a number
+	syscall		# call write number
 
 
-	b _B1		# continue while statement
-	_B1_exit:		# Continue program
+	la $a0, _L3		# The string address
+	li $v0, 4		# About to print a string
+	syscall		# call write string
 
 
 	lw $ra ($sp)		# restore old environment RA

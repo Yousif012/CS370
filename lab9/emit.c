@@ -164,10 +164,6 @@ void emit_function(ASTnode * p, FILE * fp){
     }
 }
 
-void emit_param(ASTnode * p, FILE * fp){
-
-}
-
 void emit_write(ASTnode * p, FILE * fp){
     char s[100];
     if(p->name != NULL){
@@ -208,7 +204,7 @@ void emit_var(ASTnode * p, FILE * fp){
     if(p->symbol->level == 0) // global variable
     {
 
-        if(p->symbol->SubType == SYM_ARRAY){
+        if(p->s1 != NULL){
             emit_expr(p->s1, fp);
             emit(fp, "", "move $a1, $a0", "VAR copy index array in a1");
             sprintf(s, "sll $a1, $a1 %d", LOG_W_SIZE);
@@ -222,7 +218,8 @@ void emit_var(ASTnode * p, FILE * fp){
     else{
 
         
-        if(p->symbol->SubType == SYM_ARRAY) { // p is an array     
+        if(p->s1 != NULL) { // p is an array     
+            emit_expr(p->s1, fp);
             emit(fp, "", "move $a1, $a0", "VAR copy index array in a1");
             sprintf(s, "sll $a1, $a1 %d", LOG_W_SIZE);
             emit(fp, "", s, "muliply the index by wordszie via SLL");
@@ -399,9 +396,7 @@ void emit_assign(ASTnode * p, FILE * fp){
     emit_expr(p->s2, fp);
     sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
     emit(fp, "", s, "Assign store RHS temporarily");
-    emit(fp, "", "move $a0, $sp", "VAR local make a copy of stackpointer");
-    sprintf(s, "addi $a0, $a0, %d", p->s1->symbol->offset*W_SIZE);
-    emit(fp, "", s, "VAR local stack pointer plus offset");
+    emit_var(p->s1, fp);
     sprintf(s, "lw $a1, %d($sp)", p->symbol->offset*W_SIZE);
     emit(fp, "", s, "Assign get RHS temporarily");
     emit(fp, "", "sw $a1, ($a0)", "Assign new value to variable");
@@ -453,8 +448,7 @@ void emit_while(ASTnode * p, FILE * fp){
 
     emit_expr(p->s1, fp);
 
-    emit(fp, "", "li $a1, 1", "Load 1 into $a1");
-    sprintf(s, "bne $a0, $a1, %s%s", p->label, "_exit");
+    sprintf(s, "beq $a0, $0, %s%s", p->label, "_exit");
     emit(fp, "", s, "");
 
     fprintf(fp, "\n\n\t# Enter while statement body\n");
@@ -470,6 +464,12 @@ void emit_while(ASTnode * p, FILE * fp){
     fprintf(fp, "\n\n");
 }
 
+void emit_param(ASTnode * p, FILE * fp){
+    char s[100];
+
+    return;
+
+}
 
 void emit(FILE *fp, char * label, char * command, char * comment)
 {
