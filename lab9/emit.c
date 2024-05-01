@@ -4,6 +4,7 @@
 
 int STRING_COUNT = 0; // global variable for count of strings
 int BRANCH_COUNT = 0; // global variable for count of branches (if and while statements)
+int T_COUNT = 0; // global variable for count of branches (if and while statements)
 
 
 void EMIT(ASTnode * p, FILE * fp){
@@ -17,6 +18,7 @@ void EMIT(ASTnode * p, FILE * fp){
     fprintf(fp, ".align 2\n");
     EMIT_GLOBALS(p, fp);
     fprintf(fp, ".text\n\n\n");
+    fprintf(fp, ".globl main\n\n\n");
     EMIT_AST(p, fp);
 
 }
@@ -91,6 +93,17 @@ void EMIT_AST(ASTnode * p, FILE * fp){
             break;
         case A_PARAM:
             emit_param(p, fp);
+            break;
+        case A_EXPR_STMT:
+            EMIT_AST(p->s1, fp);
+            EMIT_AST(p->next, fp);
+            break;
+        case A_CALL:
+            emit_call(p, fp);
+            EMIT_AST(p->next, fp);
+            break;
+        case A_RETURN:
+            emit_expr(p->s1, fp);
             EMIT_AST(p->next, fp);
             break;
 
@@ -122,7 +135,18 @@ char * CreateBranchLabel()
     BRANCH_COUNT++;
     return (s);
 }
-
+char * CreateT()
+{
+    if(T_COUNT > 8) {
+        exit(1);
+    }
+    char hold[100];
+    char *s;
+    sprintf(hold,"t%d",T_COUNT);
+    s=strdup(hold);
+    T_COUNT++;
+    return (s);
+}
 
 void emit_function(ASTnode * p, FILE * fp){
 
@@ -147,6 +171,7 @@ void emit_function(ASTnode * p, FILE * fp){
     EMIT_AST(p->s2, fp);
 
     // restore RA and SP before we return
+    // li $a0, 0		# RETURN has no specified value set to 0
     emit(fp, "", "lw $ra ($sp)", "restore old environment RA");
     sprintf(s, "lw $sp %d($sp)", W_SIZE);
     emit(fp, "", s, "Return from function store SP");
@@ -161,6 +186,8 @@ void emit_function(ASTnode * p, FILE * fp){
     }
     else{
         // jump back to the caller
+        emit(fp, "", "jr $ra", "Jump back to caller");
+        fprintf(fp, "\n\n");
     }
 }
 
@@ -196,9 +223,6 @@ void emit_read(ASTnode * p, FILE * fp){
 void emit_var(ASTnode * p, FILE * fp){
     char s[100];
     
-    printf("%s: %d\n", p->name, p->symbol->offset);
-
-
     // handle internal offset if array
 
     if(p->symbol->level == 0) // global variable
@@ -259,6 +283,9 @@ void emit_expr(ASTnode * p, FILE * fp){
             return;
             break;
         case A_EXPR: break; // handled after switch
+        case A_CALL:
+            emit_call(p, fp);
+            break;
 
         default: printf("emit_expr switch NEVER SHOULD BE HERE\n");
                  printf("FIX FIX FIX\n");
@@ -464,8 +491,56 @@ void emit_while(ASTnode * p, FILE * fp){
     fprintf(fp, "\n\n");
 }
 
+void emit_call(ASTnode * p, FILE * fp){
+    char s[100];
+
+    ASTnode *MYPARM, *MYARG;
+    MYARG = p->s1;
+
+    int i = 0;
+    while (MYARG != NULL){
+        emit_expr(MYARG->s1, fp);
+
+        sprintf(s, "sw $a0, %d($sp)", MYARG->symbol->offset*W_SIZE);
+        emit(fp, "", s, "Call store args temporarily");
+
+        MYARG = MYARG->next;
+
+    }
+
+    MYARG = p->s1;
+
+    while (MYARG != NULL){
+
+        sprintf(s, "lw $a0, %d($sp)", MYARG->symbol->offset*W_SIZE);
+        emit(fp, "", s, "Call store address in $a0");
+        sprintf(s, "move $t%d, $a0", i);
+        emit(fp, "", s, "Call store args in $t registers");
+
+        MYARG = MYARG->next;
+        i+=1;
+
+    }
+
+    sprintf(s, "jal %s", p->name);
+    emit(fp, "", s, "Jump to function");
+
+    fprintf(fp, "\n\n");
+
+}
+
 void emit_param(ASTnode * p, FILE * fp){
     char s[100];
+
+    int i = 0;
+    while(p != NULL){
+        sprintf(s, "sw $t%d, %d($sp)", i, p->symbol->offset*W_SIZE);
+        emit(fp, "", s, "Param store address in $t register");
+        p = p->next;
+        i+=1;
+    }
+
+    fprintf(fp, "\n\n");
 
     return;
 
