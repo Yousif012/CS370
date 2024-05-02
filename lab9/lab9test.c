@@ -22,7 +22,7 @@ void main(void)
 
    write i;
 
-   write "\n"
+   write "\n";
 
    i = 0;
    while (i < 19)
