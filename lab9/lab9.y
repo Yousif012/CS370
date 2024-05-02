@@ -573,9 +573,7 @@ int main(int argc, char *argv[])
 	if(strcmp(argv[i], "-o") == 0){
 		strcpy(s, argv[i+1]);
 		strcat(s, ".asm");
-		printf("File name is %s \n", s);
 	} 
-	printf("%s\n", argv[i]);
   }
   
   fp = fopen(s, "w");
