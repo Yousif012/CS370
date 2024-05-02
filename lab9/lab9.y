@@ -1,11 +1,10 @@
 /*
     Yosif Yosif
-    Lab 6
-    March 25, 2024
+    Lab 9
+    May 1, 2024
     Description:
-      In this file, we add semantic actions to every rule in the file in order to implement
-	  the Abstract Synatax Tree.
-
+      In this file, we define the sematic actions for every rule and we create an AST tree
+	  and use it in our call to the EMIT function which prints out MIPS code to a specified file
 */
 
 %{

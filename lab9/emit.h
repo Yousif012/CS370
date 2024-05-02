@@ -1,3 +1,11 @@
+/*
+    Yosif Yosif
+    Lab 9
+    May 1, 2024
+    Description:
+        In this file we define the function headers for emit.c
+*/
+
 #ifndef EMIT_H
 #define EMIT_H
 #include "ast.h"

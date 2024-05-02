@@ -1,20 +1,8 @@
-/*   Abstract syntax tree code
-
-     This code is used to define an AST node,
-    routine for printing out the AST
-    defining an enumerated type so we can figure out what we need to
-    do with this.  The ENUM is basically going to be every non-terminal
-    and terminal in our language.
-
-    Shaun Cooper Spring 2023
-
-*/
-
 /*
 
     Yosif Yosif
-    Lab 6
-    March 25, 2024
+    Lab 9
+    May 1, 2024
     Description:
       In this file, we define the functions responsible for the Abstract Syntax Tree. We create functions for
       creating nodes, printing indentation, converting types to strings, and printing the tree.

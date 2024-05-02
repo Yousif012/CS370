@@ -1,9 +1,9 @@
 /*
     Yosif Yosif
-    Lab 6
-    March 26, 2024
+    Lab 9
+    May 1, 2024
     Description:
-      We don't change anything here from lab 5.
+      LEX file to define the syntax for our C-Minus implementation
 
 */
 

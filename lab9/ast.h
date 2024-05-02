@@ -1,21 +1,10 @@
-/*   Abstract syntax tree code
-
-
- Header file   
- Shaun Cooper Spring 2023
-
- You must add appropriate header code that describes what this does
-
-*/
-
 /*
 
     Yosif Yosif
-    Lab 6
-    March 25, 2024
+    Lab 9
+    May 1, 2024
     Description:
-      In this file, we have added more types to the enum ASTtype and we have also added types
-      to AST_OPERATORS to represent the different operators we use in the program.
+      In this file, we define the types and function headers for the AST tree
 
 */
 

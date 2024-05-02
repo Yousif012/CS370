@@ -1,12 +1,26 @@
+/*
+Level for grading:
+e)  Can do a-d and handle function calls (grad students 10%off)
+*/
+
+/*
+    Yosif Yosif
+    Lab 9
+    May 1, 2024
+    Description:
+        In this file, we define the emit functions responsible for printing MIPS code into a file
+*/
+
 #include "emit.h"
 #include "ast.h"
 #include <stdlib.h>
 
 int STRING_COUNT = 0; // global variable for count of strings
 int BRANCH_COUNT = 0; // global variable for count of branches (if and while statements)
-int T_COUNT = 0; // global variable for count of branches (if and while statements)
 
-
+// PRE: PTR to AST, PTR file
+// POST: prints out MIPS code into file, using helper functions
+// Description: Function is called from the YACC file to initiate the emission process
 void EMIT(ASTnode * p, FILE * fp){
 
     if(p == NULL) return;
@@ -23,7 +37,9 @@ void EMIT(ASTnode * p, FILE * fp){
 
 }
 
-
+// PRE: PTR to top of AST, and FILE ptr to print to
+// POST: prints MIPS based on global variables into file
+// Description:  Function is responsible for printing the global variables into the assembly file
 void EMIT_GLOBALS(ASTnode * p, FILE * fp){
     while (p){
         if (p->type == A_VARDEC && p->symbol->level == 0){
@@ -39,9 +55,13 @@ void EMIT_GLOBALS(ASTnode * p, FILE * fp){
     }
 }
 
+// PRE: PTR to top of AST, and FILE ptr to print to
+// POST: Adds a label into the AST for use in write statements and prints MIPS code for strings into file
+// Description:  Function is responsible for printing the string labels that are used in the write statement
 void EMIT_STRINGS(ASTnode * p, FILE * fp){
     if(p == NULL) return;
 
+    // check if write statemetns that uses string
     if (p->type == A_WRITE && p->name != NULL){
         p->label = CreateLabel();
         fprintf(fp, "%s: .asciiz %s\n", p->label, p->name);
@@ -52,10 +72,14 @@ void EMIT_STRINGS(ASTnode * p, FILE * fp){
     EMIT_STRINGS(p->s2, fp);
 }
 
+// PRE: PTR to ASTnode or null
+// POST: prints MIPS code into the file for the AST tree
+// Description: Function takes the head of the AST tree and prints everything into the assembly file
 void EMIT_AST(ASTnode * p, FILE * fp){
     if(p == NULL)
         return;
     
+    // handle each ASTnode type differently
     switch (p->type){
 
         case A_VARDEC:
@@ -116,7 +140,9 @@ void EMIT_AST(ASTnode * p, FILE * fp){
     }
 }
 
-
+// PRE: None
+// POST: Returns label #n where n is based on how many labels there are
+// Description: Function is responsible for generating numbered labels for the string labels for use in write statements
 char * CreateLabel()
 {
     char hold[100];
@@ -126,6 +152,10 @@ char * CreateLabel()
     STRING_COUNT++;
     return (s);
 }
+
+// PRE: None
+// POST: Returns label for IF and WHILE statements
+// Description: Function is responsible for generating labels for use in IF and WHILE statements. These labels are needed for the branching process in MIPS assembly
 char * CreateBranchLabel()
 {
     char hold[100];
@@ -135,19 +165,10 @@ char * CreateBranchLabel()
     BRANCH_COUNT++;
     return (s);
 }
-char * CreateT()
-{
-    if(T_COUNT > 8) {
-        exit(1);
-    }
-    char hold[100];
-    char *s;
-    sprintf(hold,"t%d",T_COUNT);
-    s=strdup(hold);
-    T_COUNT++;
-    return (s);
-}
 
+// PRE: PTR to A_FUNCTIONDEC
+// POST: MIPS code to handle function definition
+// Description: Function is responsible for printing the MIPS code needed for a function
 void emit_function(ASTnode * p, FILE * fp){
 
     char s[100];
@@ -191,6 +212,9 @@ void emit_function(ASTnode * p, FILE * fp){
     }
 }
 
+// PRE: PTR to A_WRITE
+// POST: MIPS code to generate Write string or number based on the arguments
+// Description: Function to print MIPS code needed for write statement
 void emit_write(ASTnode * p, FILE * fp){
     char s[100];
     if(p->name != NULL){
@@ -210,6 +234,9 @@ void emit_write(ASTnode * p, FILE * fp){
     }
 } // emit_write
 
+// PRE: PTR to A_READ
+// POST: MIPS code to generate a prompt to read user input and store it in a variable
+// Description: Function to print MIPS code needed for write statement
 void emit_read(ASTnode * p, FILE * fp){
 
     emit_var(p->s1, fp); // $a0 will be the location of the variable
@@ -220,6 +247,9 @@ void emit_read(ASTnode * p, FILE * fp){
 
 }
 
+// PRE: PTR to A_VAR
+// POST: MIPS code to evaluate and store variables into register $a0
+// Description: Function to print MIPS code needed for read statement
 void emit_var(ASTnode * p, FILE * fp){
     char s[100];
     
@@ -266,23 +296,29 @@ void emit_var(ASTnode * p, FILE * fp){
     }
 }
 
-
+// PRE: PTR to A_EXPR
+// POST: MIPS code to evaluate expressions and return result in register $a0
+// Description: Function to print MIPS code needed for expressions and stores result in register $a0
 void emit_expr(ASTnode * p, FILE * fp){
     char s[100];
 
     // base cases
     switch(p->type){
+        // Case: Numeric constant
         case A_NUM:
             sprintf(s, "li $a0, %d", p->value);
             emit(fp, "", s, "expression is a constant");
             return;
             break;
+        // Case: Variable
         case A_VAR:
             emit_var(p, fp); // $a0 is the memory location
             emit(fp, "", "lw $a0, ($a0)", "Expression is a VAR");
             return;
             break;
+        // Case: Nested expression
         case A_EXPR: break; // handled after switch
+        // Case: Function call
         case A_CALL:
             emit_call(p, fp);
             break;
@@ -297,6 +333,7 @@ void emit_expr(ASTnode * p, FILE * fp){
     // result will be in $a0
     if (p->type == A_EXPR){
         switch(p->operator){
+            // Addition
             case A_PLUS:
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
@@ -307,6 +344,7 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", s, "expression restore LHS from memory");
                 emit(fp, "", "add $a0, $a0, $a1", "EXPR ADD");
                 break;
+            // Subtraction
             case A_MINUS:
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
@@ -317,6 +355,7 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", s, "expression restore LHS from memory");
                 emit(fp, "", "sub $a0, $a2, $a0", "EXPR SUB");
                 break;
+            // Multiplication
             case A_MULT:
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
@@ -328,6 +367,7 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", "mult $a1, $a0", "EXPR MULT");
                 emit(fp, "", "mflo $a0", "Store multiplication result in $a0");
                 break;
+            // Division
             case A_DIV:
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
@@ -339,13 +379,14 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", "div $a0, $a2", "EXPR DIV");
                 emit(fp, "", "mfhi $a0", "Store divison result in $a0");
                 break;
+            // Unary minus
             case A_UMINUS:
                 emit_expr(p->s1, fp); // get first arg
                 emit(fp, "", "li $a2, 0", "Load 0 into $a2");
                 emit(fp, "", "sub $a0, $a2, $a0", "EXPR UMINUS");
                 break;
+            // Equal to
             case A_EE:
-                // $a0 == $a2
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
                 emit(fp, "", s, "expression store LHS temporarily");
@@ -355,8 +396,8 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", s, "expression restore LHS from memory");
                 emit(fp, "", "seq $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
+            // Not equal to
             case A_NE:
-                // $a0 != $a2
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
                 emit(fp, "", s, "expression store LHS temporarily");
@@ -366,8 +407,8 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", s, "expression restore LHS from memory");
                 emit(fp, "", "sne $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
+            // Less than
             case A_LT:
-                // $a2 < $a0
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
                 emit(fp, "", s, "expression store LHS temporarily");
@@ -377,8 +418,8 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", s, "expression restore LHS from memory");
                 emit(fp, "", "slt $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
+            // Less than or equal
             case A_LET:
-                // $a2 <= $a0
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
                 emit(fp, "", s, "expression store LHS temporarily");
@@ -388,8 +429,8 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", s, "expression restore LHS from memory");
                 emit(fp, "", "sle $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
+            // Bigger than
             case A_BT:
-                // $a2 > $a0
                 emit_expr(p->s1, fp);
                 sprintf(s, "sw $a0, %d($sp)", p->symbol->offset*W_SIZE);
                 emit(fp, "", s, "expression store LHS temporarily");
@@ -399,6 +440,7 @@ void emit_expr(ASTnode * p, FILE * fp){
                 emit(fp, "", s, "expression restore LHS from memory");
                 emit(fp, "", "sgt $a0, $a0, $a1", "Compare $a0 and $a2 and store result in $a0");
                 break;
+            // Bigger than or equal
             case A_BET:
                 // $a2 >= $a0
                 emit_expr(p->s1, fp);
@@ -417,6 +459,9 @@ void emit_expr(ASTnode * p, FILE * fp){
     }
 }
 
+// PRE: PTR to A_ASSIGN
+// POST: MIPS code to assign a variable a value
+// Description: Function to print MIPS code needed for variable assignment
 void emit_assign(ASTnode * p, FILE * fp){
     char s[100];
 
@@ -430,6 +475,9 @@ void emit_assign(ASTnode * p, FILE * fp){
     fprintf(fp, "\n\n");
 }
 
+// PRE: PTR to A_IF
+// POST: MIPS code to handle if statements by generating branches
+// Description: Function to print MIPS code needed for if statement
 void emit_if(ASTnode * p, FILE * fp){
     char s[100];
     
@@ -447,56 +495,78 @@ void emit_if(ASTnode * p, FILE * fp){
     fprintf(fp, "\n\n");
 }
 
+// PRE: PTR to A_IFBODY
+// POST: MIPS code to handle the statements inside the if body
+// Description: Function prints out MIPS code for the IF body and ELSE body
 void emit_ifBody(ASTnode * p, FILE * fp){
     char s[100];
 
+    // Emit code for else statement body
     fprintf(fp, "\n\n\t# Enter else statement body\n");
     EMIT_AST(p->s2, fp);
     sprintf(s, "b %s%s", p->label, "_exit");
     emit(fp, "", s, "Exit if statement");
+
+    // Emit code for if statement body
     fprintf(fp, "\n\n\t# Enter if statement body\n");
     sprintf(s, "%s:", p->label);
     emit(fp, "", s, "");
     EMIT_AST(p->s1, fp);
+
+    // Label to exit if statement
     sprintf(s, "%s%s:", p->label, "_exit");
     emit(fp, "", s, "Continue program");
 }
 
+// PRE: PTR to A_WHILE
+// POST: MIPS code to handle while loop by generating branches
+// Description: Function to print MIPS code needed for while statement
 void emit_while(ASTnode * p, FILE * fp){
     char s[100];
     
+    // Create a unique label for the while loop
     p->label = CreateBranchLabel();
     p->s2->label = p->label;
 
+    // Emit code for while statement condition
     fprintf(fp, "\n\n\t# Enter while statement condition\n");
-
+    // Emit the label for the beginning of the loop
     sprintf(s, "%s:", p->label);
     emit(fp, "", s, "");
 
+    // Evaluate the while condition
     emit_expr(p->s1, fp);
 
+    // Branch to the exit label if the condition is false
     sprintf(s, "beq $a0, $0, %s%s", p->label, "_exit");
     emit(fp, "", s, "");
 
+    // Emit code for while statement body
     fprintf(fp, "\n\n\t# Enter while statement body\n");
-
     EMIT_AST(p->s2, fp);
 
+    // Branch back to the beginning of the loop
     sprintf(s, "b %s", p->label);
     emit(fp, "", s, "continue while statement");
 
+    // Emit the label for the exit point of the loop
     sprintf(s, "%s%s:", p->label, "_exit");
     emit(fp, "", s, "Continue program");
 
     fprintf(fp, "\n\n");
 }
 
+// PRE: PTR to A_CALL
+// POST: MIPS code to handle function calls and change the value of the stored parameter variable according to the arguments
+// Description: Function to print MIPS code needed for function call statement
 void emit_call(ASTnode * p, FILE * fp){
     char s[100];
 
+    // Pointer for iterating over arguments
     ASTnode *MYPARM, *MYARG;
     MYARG = p->s1;
 
+    // Emit code to evaluate and store function arguments on the stack
     int i = 0;
     while (MYARG != NULL){
         emit_expr(MYARG->s1, fp);
@@ -510,7 +580,14 @@ void emit_call(ASTnode * p, FILE * fp){
 
     MYARG = p->s1;
 
+    // Load arguments from the stack into temporary registers $t0-$t9
     while (MYARG != NULL){
+
+        // Exceeded argument count
+        if(i == 8){
+            printf("Function has too many arguemnts\n");
+            exit(1);
+        }
 
         sprintf(s, "lw $a0, %d($sp)", MYARG->symbol->offset*W_SIZE);
         emit(fp, "", s, "Call store address in $a0");
@@ -522,6 +599,7 @@ void emit_call(ASTnode * p, FILE * fp){
 
     }
 
+    // Jump to the function
     sprintf(s, "jal %s", p->name);
     emit(fp, "", s, "Jump to function");
 
@@ -529,6 +607,9 @@ void emit_call(ASTnode * p, FILE * fp){
 
 }
 
+// PRE: PTR to A_PARAM
+// POST: MIPS code to store the parameter variables address in the stack
+// Description: Function to print MIPS code needed for parameters in function definition
 void emit_param(ASTnode * p, FILE * fp){
     char s[100];
 
@@ -546,6 +627,9 @@ void emit_param(ASTnode * p, FILE * fp){
 
 }
 
+// PRE: possible label, command, and comment
+// POST: prints out MIPS code into file using helper functions
+// Description: Function to print MIPS code based on the given label, command, and comment
 void emit(FILE *fp, char * label, char * command, char * comment)
 {
     if (strcmp("", comment) == 0 ) 
